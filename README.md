@@ -7,21 +7,27 @@ This project is a boilerplate of the PHP micro-framework Lumen to start quickly 
 
 Recomended for JSON API projects.
 
+
+## Packages
+
+- Flipbox Lumen Generator: Command line resources generator extension.
+https://github.com/flipboxstudio/lumen-generator
+
+
 ## Installing
 
 Lumen version installed: 5.6.
 
-Take this project as the starting point of your own API project.
+Take this project as the starting point of your own project.
 
-Create the `.env` file by copying `.env.example`, and set the application key. 
-You can generate a random key on Linux with:
+Run `composer install` on command line.
 
-`openssl rand -base64 32`
+Create the `.env` file by copying `.env.example`, and set the application key.
+On command line (command from Flipbox Lumen Generator package):
 
-To serve the project locally, on command line in the project directory:
+`php artisan key:generate`
 
-`php -S localhost:8000 -t public`
+To serve the project locally, on command line in the project directory (command
+from Flipbox Lumen Generator package):
 
-More info about installation:
-
-https://lumen.laravel.com/docs/master/installation
+`php artisan serve`

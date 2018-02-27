@@ -99,4 +99,6 @@ $app->router->group([
     require __DIR__.'/../routes/web.php';
 });
 
+$app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
+
 return $app;
