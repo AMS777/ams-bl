@@ -1,18 +1,26 @@
 # ams-bl
 
-Lumen boilerplate.
+This project is a boilerplate of the PHP micro-framework Lumen to start quickly a project with some functionality added like:
+- User register.
+- User login.
+- Emailing.
 
-Lumen 5.6.
+Recomended for JSON API projects.
 
-After cloning this project, remember creating the ".env" file by copying
-".env.example", and change the application key. You can generate a random
-key on Linux with:
+## Installing
 
-openssl rand -base64 32
+Lumen version installed: 5.6.
 
-Serve the project locally, on command line in the project directory:
+Take this project as the starting point of your own API project.
 
-php -S localhost:8000 -t public
+Create the `.env` file by copying `.env.example`, and set the application key. 
+You can generate a random key on Linux with:
+
+`openssl rand -base64 32`
+
+To serve the project locally, on command line in the project directory:
+
+`php -S localhost:8000 -t public`
 
 More info about installation:
 
