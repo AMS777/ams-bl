@@ -6,3 +6,6 @@
 /storage/framework/cache/*
 /storage/framework/views/*
 /storage/logs/*
+
+# NetBeans
+/nbproject/
