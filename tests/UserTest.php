@@ -13,4 +13,15 @@ class UserTest extends TestCase
                 'name' => 'Test Name',
             ]);
     }
+
+    public function testRegisterUserWithoutPassword()
+    {
+        $userData = [
+            'email' => 'test@test.test',
+            'name' => 'Test Name',
+        ];
+
+        $this->post('/user', $userData)
+            ->seeStatusCode(200);
+    }
 }

@@ -11,4 +11,9 @@ class UserController extends Controller
             'name' => 'Test Name',
         ];
     }
+
+    public function createUser()
+    {
+        
+    }
 }
