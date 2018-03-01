@@ -14,7 +14,7 @@ class UserTest extends TestCase
         $this->notSeeInDatabase('users', $this->userData);
 
         $this->post('/user', $this->userData)
-            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_CREATED)
             ->seeInDatabase('users', $this->userData);
     }
 
@@ -28,7 +28,7 @@ class UserTest extends TestCase
     public function testErrorGetUserEmptyEmail()
     {
         $this->get('/user?email=')
-            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST)
             ->assertEmpty($this->response->content());
     }
 
@@ -37,7 +37,7 @@ class UserTest extends TestCase
         $this->seeInDatabase('users', $this->userData);
 
         $this->delete('/user', ['email' => $this->userData['email']])
-            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $this->userData);
     }
 
