@@ -22,6 +22,7 @@ class UserTest extends TestCase
         ];
 
         $this->post('/user', $userData)
-            ->seeStatusCode(200);
+            ->seeStatusCode(200)
+            ->seeInDatabase('users', $userData);
     }
 }
