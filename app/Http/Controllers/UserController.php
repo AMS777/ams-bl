@@ -15,7 +15,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function getUser(Request $request): User
+    public function getUser(Request $request): ?User
     {
         return User::where('email', $request->input('email'))->first();
     }

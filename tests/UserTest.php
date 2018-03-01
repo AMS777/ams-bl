@@ -19,7 +19,14 @@ class UserTest extends TestCase
     public function testGetUserWithoutPassword()
     {
         $this->get('/user?email=' . $this->userData['email'])
+            ->seeStatusCode(200)
             ->seeJson($this->userData);
+    }
+
+    public function testErrorGetUserEmptyEmail()
+    {
+        $this->get('/user?email=')
+            ->assertEmpty($this->response->content());
     }
 
     public function testDeleteUser()
