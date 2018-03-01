@@ -1,5 +1,7 @@
 <?php
 
+use App\Helpers\HttpStatusCodes;
+
 class UserTest extends TestCase
 {
     private $userData = [
@@ -12,20 +14,21 @@ class UserTest extends TestCase
         $this->notSeeInDatabase('users', $this->userData);
 
         $this->post('/user', $this->userData)
-            ->seeStatusCode(200)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->seeInDatabase('users', $this->userData);
     }
 
     public function testGetUserWithoutPassword()
     {
         $this->get('/user?email=' . $this->userData['email'])
-            ->seeStatusCode(200)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->seeJson($this->userData);
     }
 
     public function testErrorGetUserEmptyEmail()
     {
         $this->get('/user?email=')
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->assertEmpty($this->response->content());
     }
 
@@ -34,7 +37,7 @@ class UserTest extends TestCase
         $this->seeInDatabase('users', $this->userData);
 
         $this->delete('/user', ['email' => $this->userData['email']])
-            ->seeStatusCode(200)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->notSeeInDatabase('users', $this->userData);
     }
 

@@ -12,7 +12,7 @@ class User extends Model
 
     public $timestamps = true;
 
-    // the attributes that are mass assignable to use with ::create()
+    // attributes that are mass assignable to use with ::create()
     protected $fillable = [
         'email', 'name',
     ];
