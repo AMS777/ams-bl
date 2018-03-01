@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
+use Illuminate\Http\Request;
+use Log;
+
 class UserController extends Controller
 {
     public function getUser()
@@ -12,8 +16,13 @@ class UserController extends Controller
         ];
     }
 
-    public function createUser()
+    public function createUser(Request $request)
     {
-        
+        $user = new User;
+
+        $user->email = $request->email;
+        $user->name = $request->name;
+
+        $user->save();
     }
 }
