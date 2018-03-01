@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\UserModel;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Helpers\HttpStatusCodes;
 
 class UserController extends Controller
 {
     public function createUser(Request $request)
     {
-        User::create([
+        UserModel::create([
             'email' => $request->input('email'),
             'name' => $request->input('name'),
         ]);
     }
 
-    public function getUser(Request $request): ?User
+    public function getUser(Request $request): ?UserModel
     {
-        return User::where('email', $request->input('email'))->first();
+        return UserModel::where('email', $request->input('email'))->first();
     }
 
     public function deleteUser(Request $request)
     {
-        User::where('email', $request->input('email'))->delete();
+        UserModel::where('email', $request->input('email'))->delete();
     }
 }
