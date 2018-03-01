@@ -9,7 +9,7 @@ class UserTest extends TestCase
         'name' => 'Test Name',
     ];
 
-    public function testRegisterUserWithoutPassword()
+    public function testRegisterUser_WithoutPassword()
     {
         $this->notSeeInDatabase('users', $this->userData);
 
@@ -18,14 +18,29 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userData);
     }
 
-    public function testGetUserWithoutPassword()
+    public function testRegisterUser_ErrorInvalidEmail()
+    {
+        $invalidUserData = [
+            'email' => 'invalid.email',
+            'name' => 'Test Name',
+        ];
+
+//        $this->delete('/user', ['email' => $invalidUserData['email']]);
+
+        $this->post('/user', $invalidUserData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJson(["email" => ["The email must be a valid email address."]])
+            ->notSeeInDatabase('users', $invalidUserData);
+    }
+
+    public function testGetUser_WithoutPassword()
     {
         $this->get('/user?email=' . $this->userData['email'])
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->seeJson($this->userData);
     }
 
-    public function testErrorGetUserEmptyEmail()
+    public function testGetUser_ErrorEmptyEmail()
     {
         $this->get('/user?email=')
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST)

@@ -5,12 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
+use Log;
+
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
-    public function createUser(Request $request): Response
+//    public function createUser(Request $request): JsonResponse
+    public function createUser(Request $request)
     {
+        try {
+            $this->validate($request, [
+                'email' => 'required|email|unique:users',
+                'name' => 'required',
+            ]);
+        } catch (ValidationException $exception) {
+
+            return $exception->getResponse();
+        }
+
         $user = UserModel::create([
             'email' => $request->input('email'),
             'name' => $request->input('name'),
