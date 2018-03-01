@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Illuminate\Http\Request;
-use Log;
 
 class UserController extends Controller
 {
@@ -18,11 +17,14 @@ class UserController extends Controller
 
     public function createUser(Request $request)
     {
-        $user = new User;
+        User::create([
+            'email' => $request->email,
+            'name' => $request->name,
+        ]);
+    }
 
-        $user->email = $request->email;
-        $user->name = $request->name;
-
-        $user->save();
+    public function deleteUser(Request $request)
+    {
+        User::where('email', $request->email)->delete();
     }
 }
