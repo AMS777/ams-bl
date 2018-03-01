@@ -7,12 +7,6 @@ class UserTest extends TestCase
         'name' => 'Test Name',
     ];
 
-    public function testGetUserWithoutPassword()
-    {
-        $this->get('/user', ['email' => $this->userData['email']])
-            ->seeJson($this->userData);
-    }
-
     public function testRegisterUserWithoutPassword()
     {
         $this->notSeeInDatabase('users', $this->userData);
@@ -20,6 +14,12 @@ class UserTest extends TestCase
         $this->post('/user', $this->userData)
             ->seeStatusCode(200)
             ->seeInDatabase('users', $this->userData);
+    }
+
+    public function testGetUserWithoutPassword()
+    {
+        $this->get('/user?email=' . $this->userData['email'])
+            ->seeJson($this->userData);
     }
 
     public function testDeleteUser()
