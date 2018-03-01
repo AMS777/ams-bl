@@ -1,11 +1,16 @@
 # ams-bl
 
-This project is a boilerplate of the PHP micro-framework Lumen to start quickly a project with some functionality added like:
+This project is a boilerplate of the PHP micro-framework Lumen to start quickly
+a project with some functionality added like:
 - User register.
 - User login.
+- User reset password.
 - Emailing.
 
 Recomended for JSON API projects.
+
+This backend project is matched with a frontend project on Javascript framework
+Ember.js (yet to be developed).
 
 
 ## Packages
