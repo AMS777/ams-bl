@@ -18,6 +18,16 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userData);
     }
 
+    public function testRegisterUser_ErrorExistingEmail()
+    {
+        $this->seeInDatabase('users', $this->userData);
+
+        $this->post('/user', $this->userData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJson(["email" => ["The email has already been taken."]])
+            ->seeInDatabase('users', $this->userData);
+    }
+
     public function testRegisterUser_ErrorInvalidEmail()
     {
         $invalidUserData = [
@@ -25,11 +35,22 @@ class UserTest extends TestCase
             'name' => 'Test Name',
         ];
 
-//        $this->delete('/user', ['email' => $invalidUserData['email']]);
-
         $this->post('/user', $invalidUserData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJson(["email" => ["The email must be a valid email address."]])
+            ->notSeeInDatabase('users', $invalidUserData);
+    }
+
+    public function testRegisterUser_ErrorEmptyEmail()
+    {
+        $invalidUserData = [
+            'email' => '',
+            'name' => 'Test Name',
+        ];
+
+        $this->post('/user', $invalidUserData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJson(["email" => ["The email field is required."]])
             ->notSeeInDatabase('users', $invalidUserData);
     }
 
@@ -43,8 +64,8 @@ class UserTest extends TestCase
     public function testGetUser_ErrorEmptyEmail()
     {
         $this->get('/user?email=')
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST)
-            ->assertEmpty($this->response->content());
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJson(["email" => ["The email field is required."]]);
     }
 
     public function testDeleteUser()

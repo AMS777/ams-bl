@@ -34,11 +34,16 @@ class UserController extends Controller
         return (new Response($user, HttpStatusCodes::SUCCESS_CREATED));
     }
 
-    public function getUser(Request $request): Response
+//    public function getUser(Request $request): JsonResponse
+    public function getUser(Request $request)
     {
-        if ( ! $request->input('email')) {
+        try {
+            $this->validate($request, [
+                'email' => 'required|email',
+            ]);
+        } catch (ValidationException $exception) {
 
-            return (new Response(null, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST));
+            return $exception->getResponse();
         }
 
         return (new Response(
