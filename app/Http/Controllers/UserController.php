@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
+use Tobscure\JsonApi\Resource;
+use App\JsonApi\UserJsonApiSerializer;
+use App\JsonApi\JsonApi1_0Document;
 
 class UserController extends Controller
 {
@@ -28,19 +31,20 @@ class UserController extends Controller
         return (new Response($user, HttpStatusCodes::SUCCESS_CREATED));
     }
 
-//    public function getUser(Request $request): JsonResponse
-    public function getUser(Request $request)
+    public function getUser(Request $request): JsonResponse
     {
-        $this->validate($request, [
+        $this->validate_ExceptionResponseJsonApi($request, [
             'email' => 'required|email|exists:users',
         ], [
             'exists' => 'The :attribute ":input" does not exist.',
         ]);
 
-        return (new Response(
-            UserModel::where('email', $request->input('email'))->first(),
-            HttpStatusCodes::SUCCESS_OK
-        ));
+        $user = UserModel::where('email', $request->input('email'))->first();
+
+        $jsonApiResource = new Resource($user, new UserJsonApiSerializer);
+        $jsonApiDocument = new JsonApi1_0Document($jsonApiResource);
+
+        return response()->json($jsonApiDocument);
     }
 
     public function deleteUser(Request $request): Response

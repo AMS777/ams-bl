@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "020be94fce534c083d5083dde5c9a903",
-    "content-hash": "21c5709e771c1f30747815103d003763",
+    "hash": "9e76c845f35bf14c03ad809e2898724d",
+    "content-hash": "6ec8829d8e3ea3991a4d2b99111a7ba5",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -2584,6 +2584,56 @@
                 "dump"
             ],
             "time": "2018-01-29 09:03:43"
+        },
+        {
+            "name": "tobscure/json-api",
+            "version": "v0.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tobscure/json-api.git",
+                "reference": "d4ba8437977c33a5189d95d9ffa751997f13b104"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tobscure/json-api/zipball/d4ba8437977c33a5189d95d9ffa751997f13b104",
+                "reference": "d4ba8437977c33a5189d95d9ffa751997f13b104",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5.9 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8 || ^5.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Tobscure\\JsonApi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Toby Zerner",
+                    "email": "toby.zerner@gmail.com"
+                }
+            ],
+            "description": "JSON-API responses in PHP",
+            "keywords": [
+                "api",
+                "json",
+                "jsonapi",
+                "standard"
+            ],
+            "time": "2017-03-05 21:16:24"
         },
         {
             "name": "vlucas/phpdotenv",

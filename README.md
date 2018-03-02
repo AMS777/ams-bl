@@ -15,12 +15,25 @@ Recomended for JSON API projects.
 Ember.js** (yet to be developed).
 
 
+## Features
+
+- JSON API. Responses follow JSON API specification:
+http://jsonapi.org/format/
+I haven't found an existing package that fulfills the complete specification
+of JSON API, but the Tobscure JSON-API package is pretty clean and easy to use.
+It lacks some implementations, like JSON API error specification, but I've
+extended it with custom functions adapted to Lumen that build error objects
+following the JSON API specification.
+
+
 ## Packages
 
 This project uses following packages:
 
 - Flipbox Lumen Generator: Command line resources generator extension.
 https://github.com/flipboxstudio/lumen-generator
+- Tobscure JSON-API: Build objects following the JSON API specification.
+https://github.com/tobscure/json-api
 
 
 ## Install

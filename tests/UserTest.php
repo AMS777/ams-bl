@@ -56,16 +56,36 @@ class UserTest extends TestCase
 
     public function testGetUser_WithoutPassword()
     {
+        $jsonApiStructure = [
+            'jsonapi',
+            'data' => ['type', 'id', 'attributes'],
+        ];
+        $jsonApiTypeUser = ['type' => 'user'];
+
         $this->get('/user?email=' . $this->userData['email'])
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeJsonStructure($jsonApiStructure)
+            ->seeJson($jsonApiTypeUser)
             ->seeJson($this->userData);
+    }
+
+    public function testGetUser_ErrorEmailGeneral()
+    {
+        $jsonApiErrorStructure = [
+            'jsonapi',
+            'errors' => [['source' => ['parameter'], 'title']],
+        ];
+
+        $this->get('/user?email=invalid.email')
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'email']);
     }
 
     public function testGetUser_ErrorInvalidEmail()
     {
         $this->get('/user?email=invalid.email')
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(['email' => ['The email must be a valid email address.']]);
+            ->seeJson(['title' => 'The email must be a valid email address.']);
     }
 
     public function testGetUser_ErrorEmailDoesNotExist()
@@ -73,15 +93,13 @@ class UserTest extends TestCase
         $notExistingEmail = 'not.existing.email@test.test';
 
         $this->get('/user?email=' . $notExistingEmail)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(['email' => ['The email "' . $notExistingEmail . '" does not exist.']]);
+            ->seeJson(['title' => 'The email "' . $notExistingEmail . '" does not exist.']);
     }
 
     public function testGetUser_ErrorEmptyEmail()
     {
         $this->get('/user?email=')
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(['email' => ['The email field is required.']]);
+            ->seeJson(['title' => 'The email field is required.']);
     }
 
     public function testDeleteUser()
