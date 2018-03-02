@@ -16,6 +16,8 @@ class UserController extends Controller
         $this->validate($request, [
             'email' => 'required|email|unique:users',
             'name' => 'required',
+        ], [
+            'unique' => 'The :attribute ":input" is already used.',
         ]);
 
         $user = UserModel::create([
@@ -30,7 +32,9 @@ class UserController extends Controller
     public function getUser(Request $request)
     {
         $this->validate($request, [
-            'email' => 'required|email',
+            'email' => 'required|email|exists:users',
+        ], [
+            'exists' => 'The :attribute ":input" does not exist.',
         ]);
 
         return (new Response(

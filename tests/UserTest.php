@@ -24,7 +24,7 @@ class UserTest extends TestCase
 
         $this->post('/user', $this->userData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(["email" => ["The email has already been taken."]])
+            ->seeJson(['email' => ['The email "' . $this->userData['email'] . '" is already used.']])
             ->seeInDatabase('users', $this->userData);
     }
 
@@ -37,7 +37,7 @@ class UserTest extends TestCase
 
         $this->post('/user', $invalidUserData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(["email" => ["The email must be a valid email address."]])
+            ->seeJson(['email' => ['The email must be a valid email address.']])
             ->notSeeInDatabase('users', $invalidUserData);
     }
 
@@ -50,7 +50,7 @@ class UserTest extends TestCase
 
         $this->post('/user', $invalidUserData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(["email" => ["The email field is required."]])
+            ->seeJson(['email' => ['The email field is required.']])
             ->notSeeInDatabase('users', $invalidUserData);
     }
 
@@ -61,11 +61,27 @@ class UserTest extends TestCase
             ->seeJson($this->userData);
     }
 
+    public function testGetUser_ErrorInvalidEmail()
+    {
+        $this->get('/user?email=invalid.email')
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJson(['email' => ['The email must be a valid email address.']]);
+    }
+
+    public function testGetUser_ErrorEmailDoesNotExist()
+    {
+        $notExistingEmail = 'not.existing.email@test.test';
+
+        $this->get('/user?email=' . $notExistingEmail)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJson(['email' => ['The email "' . $notExistingEmail . '" does not exist.']]);
+    }
+
     public function testGetUser_ErrorEmptyEmail()
     {
         $this->get('/user?email=')
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(["email" => ["The email field is required."]]);
+            ->seeJson(['email' => ['The email field is required.']]);
     }
 
     public function testDeleteUser()
