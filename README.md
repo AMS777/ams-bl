@@ -1,5 +1,7 @@
 # ams-bl
 
+**Disclaimer: This project is under development, intended functionality it's not yet finished.**
+
 This project is a boilerplate of the PHP micro-framework Lumen to start quickly
 a project with some functionality added like:
 - User register.
@@ -9,30 +11,73 @@ a project with some functionality added like:
 
 Recomended for JSON API projects.
 
-This backend project is matched with a frontend project on Javascript framework
-Ember.js (yet to be developed).
+**This backend project is matched with a frontend project on Javascript framework
+Ember.js** (yet to be developed).
 
 
 ## Packages
+
+This project uses following packages:
 
 - Flipbox Lumen Generator: Command line resources generator extension.
 https://github.com/flipboxstudio/lumen-generator
 
 
-## Installing
+## Install
 
 Lumen version installed: 5.6.
 
-Take this project as the starting point of your own project.
+Download or fork this project and take it as the starting point of your own project.
 
-Run `composer install` on command line.
+On command line inside the project directory:
 
-Create the `.env` file by copying `.env.example`, and set the application key.
-On command line (command from Flipbox Lumen Generator package):
+```
+$ composer install
+```
 
-`php artisan key:generate`
+Create the `.env` file by copying `.env.example`, and set the application key with
+the command (from Flipbox Lumen Generator package):
+
+```
+$ php artisan key:generate
+```
 
 To serve the project locally, on command line in the project directory (command
 from Flipbox Lumen Generator package):
 
-`php artisan serve`
+```
+$ php artisan serve
+```
+
+
+## Usage
+
+After creating your own project from this one, add your own files to the
+existing ones.
+
+You can modify the existing files on the project you've created. The key
+files are:
+
+- `tests/UserTest.php`
+- `app/Http/Controllers/UserController.php`
+- `app/Models/UserModel.php`
+
+
+## Tests
+
+```
+$ phpunit
+```
+
+If error "No tests executed!" or some other is produced, global installed
+`phpunit` package may be being used and having an unmatching version for this
+project. Local installed `phpunit` must be used instead:
+
+```
+$ vendor/phpunit/phpunit/phpunit
+```
+
+
+## License
+
+MIT License. Please see [LICENSE file](LICENSE) for more information.
