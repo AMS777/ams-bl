@@ -7,24 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
-use Log;
-
-use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
 //    public function createUser(Request $request): JsonResponse
     public function createUser(Request $request)
     {
-        try {
-            $this->validate($request, [
-                'email' => 'required|email|unique:users',
-                'name' => 'required',
-            ]);
-        } catch (ValidationException $exception) {
-
-            return $exception->getResponse();
-        }
+        $this->validate($request, [
+            'email' => 'required|email|unique:users',
+            'name' => 'required',
+        ]);
 
         $user = UserModel::create([
             'email' => $request->input('email'),
@@ -37,14 +29,9 @@ class UserController extends Controller
 //    public function getUser(Request $request): JsonResponse
     public function getUser(Request $request)
     {
-        try {
-            $this->validate($request, [
-                'email' => 'required|email',
-            ]);
-        } catch (ValidationException $exception) {
-
-            return $exception->getResponse();
-        }
+        $this->validate($request, [
+            'email' => 'required|email',
+        ]);
 
         return (new Response(
             UserModel::where('email', $request->input('email'))->first(),
