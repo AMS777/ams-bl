@@ -29,13 +29,25 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userData);
     }
 
+    public function testRegisterUser_ErrorEmailGeneral()
+    {
+        $invalidUserData = [
+            'email' => 'invalid.email',
+            'name' => 'Test Name',
+        ];
+
+        $this->post('/user', $invalidUserData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'email']);
+    }
+
     public function testRegisterUser_ErrorExistingEmail()
     {
         $this->seeInDatabase('users', $this->userData);
 
         $this->post('/user', $this->userData)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(['email' => ['The email "' . $this->userData['email'] . '" is already used.']])
+            ->seeJson(['title' => 'The email "' . $this->userData['email'] . '" is already used.'])
             ->seeInDatabase('users', $this->userData);
     }
 
@@ -47,8 +59,7 @@ class UserTest extends TestCase
         ];
 
         $this->post('/user', $invalidUserData)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(['email' => ['The email must be a valid email address.']])
+            ->seeJson(['title' => 'The email must be a valid email address.'])
             ->notSeeInDatabase('users', $invalidUserData);
     }
 
@@ -60,8 +71,7 @@ class UserTest extends TestCase
         ];
 
         $this->post('/user', $invalidUserData)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJson(['email' => ['The email field is required.']])
+            ->seeJson(['title' => 'The email field is required.'])
             ->notSeeInDatabase('users', $invalidUserData);
     }
 

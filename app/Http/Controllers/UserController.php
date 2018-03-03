@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function createUser(Request $request): JsonResponse
     {
-        $this->validate($request, [
+        $this->validate_ExceptionResponseJsonApi($request, [
             'email' => 'required|email|unique:users',
             'name' => 'required',
         ], [
