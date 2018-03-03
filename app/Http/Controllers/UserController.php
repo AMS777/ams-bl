@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\UserModel;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
 
@@ -40,10 +39,10 @@ class UserController extends Controller
         return $this->getJsonApiResponse($user);
     }
 
-    public function deleteUser(Request $request): Response
+    public function deleteUser(Request $request): JsonResponse
     {
         UserModel::where('email', $request->input('email'))->delete();
 
-        return (new Response(null, HttpStatusCodes::SUCCESS_NO_CONTENT));
+        return $this->getNoContentResponse();
     }
 }

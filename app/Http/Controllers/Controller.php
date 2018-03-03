@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Helpers\HttpStatusCodes;
 use Illuminate\Validation\ValidationException;
 use App\Models\UserModel;
 use Tobscure\JsonApi\SerializerInterface;
@@ -55,5 +56,10 @@ class Controller extends BaseController
         }
 
         return $serializer;
+    }
+
+    protected function getNoContentResponse(): JsonResponse
+    {
+        return response()->json(null, HttpStatusCodes::SUCCESS_NO_CONTENT);
     }
 }
