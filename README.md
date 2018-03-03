@@ -1,15 +1,17 @@
 # ams-bl
 
-**Disclaimer: This project is under development, intended functionality it's not yet finished.**
+**Disclaimer: This project is under development, intended functionality it's
+not yet finished.**
 
-This project is a boilerplate of the PHP micro-framework Lumen to start quickly
-a project with some functionality added like:
+This project is a quick-start boilerplate of the PHP micro-framework Lumen to
+start a project with some useful functionality out of the box like:
 - User register.
 - User login.
 - User reset password.
 - Emailing.
 
-Recomended for JSON API projects.
+Recomended for API projects that implement the JSON API specification
+(http://jsonapi.org/).
 
 **This backend project is matched with a frontend project on Javascript framework
 Ember.js** (yet to be developed).
@@ -17,7 +19,9 @@ Ember.js** (yet to be developed).
 
 ## Features
 
-- JSON API. Responses follow JSON API specification:
+- TDD. This project uses [Test Driven Development](https://www.agilealliance.org/glossary/tdd/)
+as development methodology with unit tests.
+- JSON API. Responses follow JSON API v1.0 specification:
 http://jsonapi.org/format/
 I haven't found an existing package that fulfills the complete specification
 of JSON API, but the Tobscure JSON-API package is pretty clean and easy to use.
