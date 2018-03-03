@@ -43,6 +43,6 @@ class UserController extends Controller
     {
         UserModel::where('email', $request->input('email'))->delete();
 
-        return $this->getNoContentResponse();
+        return $this->getNoContentJsonResponse();
     }
 }

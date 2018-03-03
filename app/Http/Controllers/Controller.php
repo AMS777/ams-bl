@@ -58,7 +58,7 @@ class Controller extends BaseController
         return $serializer;
     }
 
-    protected function getNoContentResponse(): JsonResponse
+    protected function getNoContentJsonResponse(): JsonResponse
     {
         return response()->json(null, HttpStatusCodes::SUCCESS_NO_CONTENT);
     }
