@@ -8,6 +8,15 @@ class UserTest extends TestCase
         'email' => 'test@test.test',
         'name' => 'Test Name',
     ];
+    private $jsonApiStructure = [
+        'jsonapi',
+        'data' => ['type', 'id', 'attributes'],
+    ];
+    private $jsonApiTypeUser = ['type' => 'user'];
+    private $jsonApiErrorStructure = [
+        'jsonapi',
+        'errors' => [['source' => ['parameter'], 'title']],
+    ];
 
     public function testRegisterUser_WithoutPassword()
     {
@@ -15,6 +24,8 @@ class UserTest extends TestCase
 
         $this->post('/user', $this->userData)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_CREATED)
+            ->seeJsonStructure($this->jsonApiStructure)
+            ->seeJson($this->jsonApiTypeUser)
             ->seeInDatabase('users', $this->userData);
     }
 
@@ -56,29 +67,18 @@ class UserTest extends TestCase
 
     public function testGetUser_WithoutPassword()
     {
-        $jsonApiStructure = [
-            'jsonapi',
-            'data' => ['type', 'id', 'attributes'],
-        ];
-        $jsonApiTypeUser = ['type' => 'user'];
-
         $this->get('/user?email=' . $this->userData['email'])
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
-            ->seeJsonStructure($jsonApiStructure)
-            ->seeJson($jsonApiTypeUser)
+            ->seeJsonStructure($this->jsonApiStructure)
+            ->seeJson($this->jsonApiTypeUser)
             ->seeJson($this->userData);
     }
 
     public function testGetUser_ErrorEmailGeneral()
     {
-        $jsonApiErrorStructure = [
-            'jsonapi',
-            'errors' => [['source' => ['parameter'], 'title']],
-        ];
-
         $this->get('/user?email=invalid.email')
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($jsonApiErrorStructure)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
             ->seeJson(['parameter' => 'email']);
     }
 

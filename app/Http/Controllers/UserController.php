@@ -7,9 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
-use Tobscure\JsonApi\Resource;
 use App\JsonApi\JsonApiSerializer_User;
-use App\JsonApi\JsonApi1_0Document;
 
 class UserController extends Controller
 {
@@ -28,7 +26,9 @@ class UserController extends Controller
             'name' => $request->input('name'),
         ]);
 
-        return (new Response($user, HttpStatusCodes::SUCCESS_CREATED));
+        return $this->getJsonApiResponse(
+            $user, new JsonApiSerializer_User, HttpStatusCodes::SUCCESS_CREATED
+        );
     }
 
     public function getUser(Request $request): JsonResponse
@@ -41,10 +41,7 @@ class UserController extends Controller
 
         $user = UserModel::where('email', $request->input('email'))->first();
 
-        $jsonApiResource = new Resource($user, new JsonApiSerializer_User);
-        $jsonApiDocument = new JsonApi1_0Document($jsonApiResource);
-
-        return response()->json($jsonApiDocument);
+        return $this->getJsonApiResponse($user, new JsonApiSerializer_User);
     }
 
     public function deleteUser(Request $request): Response
