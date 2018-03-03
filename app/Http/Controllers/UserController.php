@@ -8,7 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
 use Tobscure\JsonApi\Resource;
-use App\JsonApi\UserJsonApiSerializer;
+use App\JsonApi\JsonApiSerializer_User;
 use App\JsonApi\JsonApi1_0Document;
 
 class UserController extends Controller
@@ -41,7 +41,7 @@ class UserController extends Controller
 
         $user = UserModel::where('email', $request->input('email'))->first();
 
-        $jsonApiResource = new Resource($user, new UserJsonApiSerializer);
+        $jsonApiResource = new Resource($user, new JsonApiSerializer_User);
         $jsonApiDocument = new JsonApi1_0Document($jsonApiResource);
 
         return response()->json($jsonApiDocument);

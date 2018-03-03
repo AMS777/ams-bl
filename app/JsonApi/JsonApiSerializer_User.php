@@ -4,7 +4,7 @@ namespace App\JsonApi;
 
 use Tobscure\JsonApi\AbstractSerializer;
 
-class UserJsonApiSerializer extends AbstractSerializer
+class JsonApiSerializer_User extends AbstractSerializer
 {
     protected $type = 'user';
 
