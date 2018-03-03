@@ -14,7 +14,8 @@ class Controller extends BaseController
 {
     protected function validate_ExceptionResponseJsonApi(
         Request $request, array $rules, array $messages = []
-    ) {
+    ): void
+    {
         try {
 
             $this->validate($request, $rules, $messages);

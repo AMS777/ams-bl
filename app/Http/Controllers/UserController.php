@@ -11,8 +11,7 @@ use App\JsonApi\JsonApiSerializer_User;
 
 class UserController extends Controller
 {
-//    public function createUser(Request $request): JsonResponse
-    public function createUser(Request $request)
+    public function createUser(Request $request): JsonResponse
     {
         $this->validate($request, [
             'email' => 'required|email|unique:users',

@@ -28,6 +28,9 @@ of JSON API, but the Tobscure JSON-API package is pretty clean and easy to use.
 It lacks some implementations, like JSON API error specification, but I've
 extended it with custom functions adapted to Lumen that build error objects
 following the JSON API specification.
+- PHP7. This project uses PHP7 features. The
+[Lumen version](https://lumen.laravel.com/docs/5.6#installation)
+of this project requires PHP7.
 
 
 ## Packages
