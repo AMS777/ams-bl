@@ -6,7 +6,9 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use App\Models\UserModel;
 use Tobscure\JsonApi\SerializerInterface;
+use App\JsonApi\JsonApiSerializer_User;
 use Tobscure\JsonApi\Resource;
 use App\JsonApi\JsonApi1_0Document;
 
@@ -30,13 +32,28 @@ class Controller extends BaseController
         }
     }
 
-    protected function getJsonApiResponse(
-        $data, SerializerInterface $serializer, $httpStatus = 200
-    ): JsonResponse
+    protected function getJsonApiResponse($model, $httpStatus = 200): JsonResponse
     {
-        $jsonApiResource = new Resource($data, $serializer);
-        $jsonApiDocument = new JsonApi1_0Document($jsonApiResource);
+        $jsonApiDocument = null;
+
+        $serializer = $this->getJsonApiSerializerFromModel($model);
+
+        if ( ! empty($serializer)) {
+            $jsonApiResource = new Resource($model, $serializer);
+            $jsonApiDocument = new JsonApi1_0Document($jsonApiResource);
+        }
 
         return response()->json($jsonApiDocument, $httpStatus);
+    }
+
+    private function getJsonApiSerializerFromModel($model): ?SerializerInterface
+    {
+        $serializer = null;
+
+        if ($model instanceof UserModel) {
+            $serializer = new JsonApiSerializer_User;
+        }
+
+        return $serializer;
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
-use App\JsonApi\JsonApiSerializer_User;
 
 class UserController extends Controller
 {
@@ -25,9 +24,7 @@ class UserController extends Controller
             'name' => $request->input('name'),
         ]);
 
-        return $this->getJsonApiResponse(
-            $user, new JsonApiSerializer_User, HttpStatusCodes::SUCCESS_CREATED
-        );
+        return $this->getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
     }
 
     public function getUser(Request $request): JsonResponse
@@ -40,7 +37,7 @@ class UserController extends Controller
 
         $user = UserModel::where('email', $request->input('email'))->first();
 
-        return $this->getJsonApiResponse($user, new JsonApiSerializer_User);
+        return $this->getJsonApiResponse($user);
     }
 
     public function deleteUser(Request $request): Response
