@@ -3,7 +3,7 @@
 use App\Helpers\HttpStatusCodes;
 use App\Models\UserModel;
 
-class UserTestCase extends TestCase
+class UserTest extends TestCase
 {
     private $userData = [
         'email' => 'test@test.test',
