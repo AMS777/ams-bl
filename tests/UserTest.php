@@ -88,7 +88,7 @@ class UserTest extends TestCase
 
     public function testRegisterUser_Success()
     {
-//        $this->notSeeInDatabase('users', $this->userData);
+        $this->notSeeInDatabase('users', $this->userData);
 
         $this->post('/user', $this->userData)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_CREATED)
@@ -97,6 +97,9 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userData);
     }
 
+    /**
+     * @depends testRegisterUser_Success
+     */
     public function testRegisterUser_ErrorExistingEmail()
     {
         $this->seeInDatabase('users', $this->userData);
@@ -108,6 +111,9 @@ class UserTest extends TestCase
 
     /* GET USER ***************************************************************/
 
+    /**
+     * @depends testRegisterUser_Success
+     */
     public function testPasswordNotReturnedFromDbOnUserModel()
     {
         $user = UserModel::where('email', $this->userData['email'])->first();
@@ -144,6 +150,9 @@ class UserTest extends TestCase
             ->seeJson(['title' => 'The email field is required.']);
     }
 
+    /**
+     * @depends testRegisterUser_Success
+     */
     public function testGetUser_Success()
     {
         $urlQuery = '?email=' . urlencode($this->userData['email'])
@@ -161,6 +170,9 @@ class UserTest extends TestCase
 
     /* DELETE USER ************************************************************/
 
+    /**
+     * @depends testRegisterUser_Success
+     */
     public function testDeleteUser_Success()
     {
         $this->seeInDatabase('users', $this->userData);
