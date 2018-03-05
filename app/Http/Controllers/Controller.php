@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\UserModel;
 use Tobscure\JsonApi\SerializerInterface;
 use App\JsonApi\JsonApiSerializer_User;
@@ -25,15 +26,13 @@ class Controller extends BaseController
 
         } catch (ValidationException $exception) {
 
-            $jsonApiDocument = new JsonApi1_0Document;
-            $jsonApiDocument->setErrorsFromKeyValueFormat($exception->errors());
-            $exception->response = response()->json($jsonApiDocument, $exception->status);
+            $exception->response = $this->getJsonApiErrorResponse($exception->errors(), $exception->status);
 
             throw $exception;
         }
     }
 
-    protected function getJsonApiResponse($model, $httpStatus = 200): JsonResponse
+    protected function getJsonApiResponse(Model $model, int $httpStatus = 200): JsonResponse
     {
         $jsonApiDocument = null;
 
@@ -47,7 +46,7 @@ class Controller extends BaseController
         return response()->json($jsonApiDocument, $httpStatus);
     }
 
-    private function getJsonApiSerializerFromModel($model): ?SerializerInterface
+    private function getJsonApiSerializerFromModel(Model $model): ?SerializerInterface
     {
         $serializer = null;
 
@@ -56,6 +55,14 @@ class Controller extends BaseController
         }
 
         return $serializer;
+    }
+
+    protected function getJsonApiErrorResponse(array $errors, int $httpStatus): JsonResponse
+    {
+        $jsonApiDocument = new JsonApi1_0Document;
+        $jsonApiDocument->setErrorsFromKeyValueFormat($errors);
+
+        return response()->json($jsonApiDocument, $httpStatus);
     }
 
     protected function getNoContentJsonResponse(): JsonResponse

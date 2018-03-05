@@ -26,7 +26,7 @@ class UserController extends Controller
         $user = UserModel::create([
             'email' => $request->input('email'),
             'name' => $request->input('name'),
-            'password' => $request->input('password'),
+            'password' => $this->getPasswordHash($request->input('password')),
         ]);
 
         return $this->getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
@@ -41,9 +41,14 @@ class UserController extends Controller
             'exists' => 'The :attribute ":input" does not exist.',
         ]);
 
-        $user = UserModel::where('email', $request->input('email'))
-            ->where('password', $request->input('password'))
-            ->first();
+        $user = UserModel::where('email', $request->input('email'))->first();
+
+        if ( ! $this->verifyPassword($request->input('password'), $user['password'])) {
+
+            $errors = ['mixed' => ['There is no account with those email and password.']];
+
+            return $this->getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
+        }
 
         return $this->getJsonApiResponse($user);
     }
@@ -53,5 +58,15 @@ class UserController extends Controller
         UserModel::where('email', $request->input('email'))->delete();
 
         return $this->getNoContentJsonResponse();
+    }
+
+    private function getPasswordHash(string $password): string
+    {
+        return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    private function verifyPassword(string $password, string $hash): bool
+    {
+        return password_verify($password, $hash);
     }
 }
