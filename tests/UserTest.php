@@ -1,12 +1,15 @@
 <?php
 
 use App\Helpers\HttpStatusCodes;
+use App\Models\UserModel;
+use App\Log;
 
 class UserTest extends TestCase
 {
     private $userData = [
         'email' => 'test@test.test',
         'name' => 'Test Name',
+        'password' => 'test_password.#',
     ];
     private $jsonApiStructure = [
         'jsonapi',
@@ -18,9 +21,42 @@ class UserTest extends TestCase
         'errors' => [['source' => ['parameter'], 'title']],
     ];
 
-    public function testRegisterUser_WithoutPassword()
+    public function testRegisterUser_ErrorPasswordTooShort()
     {
-        $this->notSeeInDatabase('users', $this->userData);
+        $shortPassword = '1234';
+
+        $invalidUserData = $this->userData;
+        $invalidUserData['password'] = $shortPassword;
+
+        $errorMessage = 'The password must be between ' . env('PASSWORD_MIN_CHARACTERS')
+            . ' and ' . env('PASSWORD_MAX_CHARACTERS') . ' characters.';
+
+        $this->post('/user', $invalidUserData)
+            ->seeJson(['title' => $errorMessage])
+            ->notSeeInDatabase('users', $invalidUserData);
+    }
+
+    public function testRegisterUser_ErrorPasswordTooLong()
+    {
+        $longPassword = '';
+        for ($i = 0; $i <= 11; $i++) {
+            $longPassword .= '0123456789';
+        }
+
+        $invalidUserData = $this->userData;
+        $invalidUserData['password'] = $longPassword;
+
+        $errorMessage = 'The password must be between ' . env('PASSWORD_MIN_CHARACTERS')
+            . ' and ' . env('PASSWORD_MAX_CHARACTERS') . ' characters.';
+
+        $this->post('/user', $invalidUserData)
+            ->seeJson(['title' => $errorMessage])
+            ->notSeeInDatabase('users', $invalidUserData);
+    }
+
+    public function testRegisterUser()
+    {
+//        $this->notSeeInDatabase('users', $this->userData);
 
         $this->post('/user', $this->userData)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_CREATED)
@@ -75,13 +111,27 @@ class UserTest extends TestCase
             ->notSeeInDatabase('users', $invalidUserData);
     }
 
-    public function testGetUser_WithoutPassword()
+    public function testGetUser()
     {
-        $this->get('/user?email=' . $this->userData['email'])
+        $urlQuery = '?email=' . urlencode($this->userData['email'])
+            . '&password=' . urlencode($this->userData['password']);
+
+        $userDataWithoutPassword = $this->userData;
+        unset($userDataWithoutPassword['password']);
+
+        $this->get('/user' . $urlQuery)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->seeJsonStructure($this->jsonApiStructure)
             ->seeJson($this->jsonApiTypeUser)
-            ->seeJson($this->userData);
+            ->seeJson($userDataWithoutPassword);
+    }
+
+    public function testPasswordNotReturnedFromDbOnUserModel()
+    {
+        $user = UserModel::where('email', $this->userData['email'])->first();
+
+        $this->assertNotContains('password', $user->toArray());
+        $this->assertArrayNotHasKey('password', $user->toArray());
     }
 
     public function testGetUser_ErrorEmailGeneral()

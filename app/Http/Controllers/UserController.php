@@ -6,14 +6,19 @@ use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
+use Log;
 
 class UserController extends Controller
 {
     public function createUser(Request $request): JsonResponse
     {
+        $charactersRangeSizeForPassword = env('PASSWORD_MIN_CHARACTERS') . ','
+            . env('PASSWORD_MAX_CHARACTERS');
+
         $this->validate_ExceptionResponseJsonApi($request, [
             'email' => 'required|email|unique:users',
             'name' => 'required',
+            'password' => 'required|between:' . $charactersRangeSizeForPassword,
         ], [
             'unique' => 'The :attribute ":input" is already used.',
         ]);
@@ -21,6 +26,7 @@ class UserController extends Controller
         $user = UserModel::create([
             'email' => $request->input('email'),
             'name' => $request->input('name'),
+            'password' => $request->input('password'),
         ]);
 
         return $this->getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
@@ -30,11 +36,14 @@ class UserController extends Controller
     {
         $this->validate_ExceptionResponseJsonApi($request, [
             'email' => 'required|email|exists:users',
+            'password' => 'required',
         ], [
             'exists' => 'The :attribute ":input" does not exist.',
         ]);
 
-        $user = UserModel::where('email', $request->input('email'))->first();
+        $user = UserModel::where('email', $request->input('email'))
+            ->where('password', $request->input('password'))
+            ->first();
 
         return $this->getJsonApiResponse($user);
     }

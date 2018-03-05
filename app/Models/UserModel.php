@@ -14,15 +14,11 @@ class UserModel extends Model
 
     // attributes that are mass assignable to use with ::create()
     protected $fillable = [
-        'email', 'name',
+        'email', 'name', 'password',
     ];
 
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-//    protected $hidden = [
-//        'password',
-//    ];
+    // attributes not returned when accesed the table
+    protected $hidden = [
+        'password',
+    ];
 }
