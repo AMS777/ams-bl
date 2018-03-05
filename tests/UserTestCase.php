@@ -2,9 +2,8 @@
 
 use App\Helpers\HttpStatusCodes;
 use App\Models\UserModel;
-use App\Log;
 
-class UserTest extends TestCase
+class UserTestCase extends TestCase
 {
     private $userData = [
         'email' => 'test@test.test',
@@ -20,6 +19,39 @@ class UserTest extends TestCase
         'jsonapi',
         'errors' => [['source' => ['parameter'], 'title']],
     ];
+
+    /* REGISTER USER **********************************************************/
+
+    public function testRegisterUser_ErrorEmailGeneral()
+    {
+        $invalidUserData = $this->userData;
+        $invalidUserData['email'] = 'invalid.email';
+
+        $this->post('/user', $invalidUserData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'email']);
+    }
+
+    public function testRegisterUser_ErrorEmptyEmail()
+    {
+        $invalidUserData = $this->userData;
+        $invalidUserData['email'] = '';
+
+        $this->post('/user', $invalidUserData)
+            ->seeJson(['title' => 'The email field is required.'])
+            ->notSeeInDatabase('users', $invalidUserData);
+    }
+
+    public function testRegisterUser_ErrorInvalidEmail()
+    {
+        $invalidUserData = $this->userData;
+        $invalidUserData['email'] = 'invalid.email';
+
+        $this->post('/user', $invalidUserData)
+            ->seeJson(['title' => 'The email must be a valid email address.'])
+            ->notSeeInDatabase('users', $invalidUserData);
+    }
 
     public function testRegisterUser_ErrorPasswordTooShort()
     {
@@ -54,7 +86,7 @@ class UserTest extends TestCase
             ->notSeeInDatabase('users', $invalidUserData);
     }
 
-    public function testRegisterUser()
+    public function testRegisterUser_Success()
     {
 //        $this->notSeeInDatabase('users', $this->userData);
 
@@ -63,19 +95,6 @@ class UserTest extends TestCase
             ->seeJsonStructure($this->jsonApiStructure)
             ->seeJson($this->jsonApiTypeUser)
             ->seeInDatabase('users', $this->userData);
-    }
-
-    public function testRegisterUser_ErrorEmailGeneral()
-    {
-        $invalidUserData = [
-            'email' => 'invalid.email',
-            'name' => 'Test Name',
-        ];
-
-        $this->post('/user', $invalidUserData)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['parameter' => 'email']);
     }
 
     public function testRegisterUser_ErrorExistingEmail()
@@ -87,44 +106,7 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userData);
     }
 
-    public function testRegisterUser_ErrorInvalidEmail()
-    {
-        $invalidUserData = [
-            'email' => 'invalid.email',
-            'name' => 'Test Name',
-        ];
-
-        $this->post('/user', $invalidUserData)
-            ->seeJson(['title' => 'The email must be a valid email address.'])
-            ->notSeeInDatabase('users', $invalidUserData);
-    }
-
-    public function testRegisterUser_ErrorEmptyEmail()
-    {
-        $invalidUserData = [
-            'email' => '',
-            'name' => 'Test Name',
-        ];
-
-        $this->post('/user', $invalidUserData)
-            ->seeJson(['title' => 'The email field is required.'])
-            ->notSeeInDatabase('users', $invalidUserData);
-    }
-
-    public function testGetUser()
-    {
-        $urlQuery = '?email=' . urlencode($this->userData['email'])
-            . '&password=' . urlencode($this->userData['password']);
-
-        $userDataWithoutPassword = $this->userData;
-        unset($userDataWithoutPassword['password']);
-
-        $this->get('/user' . $urlQuery)
-            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
-            ->seeJsonStructure($this->jsonApiStructure)
-            ->seeJson($this->jsonApiTypeUser)
-            ->seeJson($userDataWithoutPassword);
-    }
+    /* GET USER ***************************************************************/
 
     public function testPasswordNotReturnedFromDbOnUserModel()
     {
@@ -162,7 +144,24 @@ class UserTest extends TestCase
             ->seeJson(['title' => 'The email field is required.']);
     }
 
-    public function testDeleteUser()
+    public function testGetUser_Success()
+    {
+        $urlQuery = '?email=' . urlencode($this->userData['email'])
+            . '&password=' . urlencode($this->userData['password']);
+
+        $userDataWithoutPassword = $this->userData;
+        unset($userDataWithoutPassword['password']);
+
+        $this->get('/user' . $urlQuery)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeJsonStructure($this->jsonApiStructure)
+            ->seeJson($this->jsonApiTypeUser)
+            ->seeJson($userDataWithoutPassword);
+    }
+
+    /* DELETE USER ************************************************************/
+
+    public function testDeleteUser_Success()
     {
         $this->seeInDatabase('users', $this->userData);
 
@@ -170,5 +169,4 @@ class UserTest extends TestCase
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $this->userData);
     }
-
 }
