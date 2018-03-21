@@ -6,7 +6,7 @@ use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
-use Log;
+use App\Helpers\ResponseHelper;
 
 class UserController extends Controller
 {
@@ -29,7 +29,7 @@ class UserController extends Controller
             'password' => $this->getPasswordHash($request->input('password')),
         ]);
 
-        return $this->getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
+        return ResponseHelper::getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
     }
 
     public function getUser(Request $request): JsonResponse
@@ -47,17 +47,17 @@ class UserController extends Controller
 
             $errors = ['mixed' => ['There is no account with those email and password.']];
 
-            return $this->getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
         }
 
-        return $this->getJsonApiResponse($user);
+        return ResponseHelper::getJsonApiResponse($user);
     }
 
     public function deleteUser(Request $request): JsonResponse
     {
         UserModel::where('email', $request->input('email'))->delete();
 
-        return $this->getNoContentJsonResponse();
+        return ResponseHelper::getNoContentJsonResponse();
     }
 
     private function getPasswordHash(string $password): string
