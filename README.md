@@ -114,6 +114,15 @@ More info on Laravel documentation:
 
 https://laravel.com/docs/5.6/mail
 
+### Checking and testing emails
+
+Emails may be previewed on browsers enabling specific routes as you can see on [`routes/web.php`](routes/web.php).
+
+To test the emailing functionality, the mail driver is set to `log` so that emails
+are not sent but written on the app log (`storage/logs/lumen.log`).
+
+Thus, use `config(['mail.driver' => 'log']);` as you can see on [`tests/MessagingTest.php`](tests/MessagingTest.php).
+
 
 ## License
 
