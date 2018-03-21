@@ -14,7 +14,7 @@ Recomended for API projects that implement the JSON API specification
 (http://jsonapi.org/).
 
 **This backend project is matched with a frontend project on Javascript framework
-Ember.js** (yet to be developed).
+Ember.js** (yet on development).
 
 
 ## Features
@@ -37,10 +37,12 @@ of this project requires PHP7.
 
 This project uses following packages:
 
-- Flipbox Lumen Generator: Command line resources generator extension.
-https://github.com/flipboxstudio/lumen-generator
-- Tobscure JSON-API: Build objects following the JSON API specification.
-https://github.com/tobscure/json-api
+- Flipbox Lumen Generator: Command line resources generator extension.  
+  https://github.com/flipboxstudio/lumen-generator
+- Tobscure JSON-API: Build objects following the JSON API specification.  
+  https://github.com/tobscure/json-api
+- illuminate/mail, guzzlehttp/guzzle. Emailing functionality.  
+  See section [Emailing Functionality](#emailing-functionality).
 
 
 ## Install
@@ -96,6 +98,21 @@ project. Local installed `phpunit` must be used instead:
 ```
 $ vendor/phpunit/phpunit/phpunit
 ```
+
+
+## Emailing Functionality
+
+Lumen does not have emailing functionality. It's one of the features lost when stripping down Laravel to obtain a micro framework.
+
+To add emailing functionality I've followed the steps described on:
+
+https://stackoverflow.com/questions/47124070/easiest-way-to-send-emails-with-lumen-5-4-and-mailgun/47124071#47124071
+
+Email sending and exception handling is done on `app/Helpers/MailHelper.php`.
+
+More info on Laravel documentation:
+
+https://laravel.com/docs/5.6/mail
 
 
 ## License
