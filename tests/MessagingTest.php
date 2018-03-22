@@ -55,7 +55,8 @@ class MessagingTest extends TestCase
 
     public function testSendContactMessage_Success()
     {
-        $this->markTestSkipped('Skip');
+//        $this->markTestSkipped('Skip: Do not write too much on log.');
+
         $this->post('/contact-message', $this->data)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT);
     }
@@ -71,6 +72,46 @@ class MessagingTest extends TestCase
         $this->assertEquals('email', $jsonApiResponse->getData()->errors[0]->source->parameter);
         $this->assertEquals(
             'Address in mailbox given [' . $invalidData['email'] . '] does not comply with RFC 2822, 3.6.2.',
+            $jsonApiResponse->getData()->errors[0]->title
+        );
+    }
+
+    public function testMailHelper_ErrorWrongMailgunDomain()
+    {
+        $this->markTestSkipped('Skip: Do not access Mailgun with wrong domain often to avoid being blacklisted.');
+
+        config(['mail.driver' => 'mailgun']);
+        config(['services.mailgun.domain' => 'invalid-domain']);
+
+        $jsonApiResponse = MailHelper::sendEmail(
+            $this->data['data']['attributes']['email'],
+            new ContactMessageEmail($this->data['data']['attributes'])
+        );
+
+        $this->assertEquals($jsonApiResponse->status(), HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        $this->assertEquals('email', $jsonApiResponse->getData()->errors[0]->source->parameter);
+        $this->assertEquals(
+            'The contact message cannot be sent because of an error sending the email.',
+            $jsonApiResponse->getData()->errors[0]->title
+        );
+    }
+
+    public function testMailHelper_ErrorWrongMailgunSecret()
+    {
+        $this->markTestSkipped('Skip: Do not access the valid domain with wrong key often to avoid being blacklisted.');
+
+        config(['mail.driver' => 'mailgun']);
+        config(['services.mailgun.secret' => 'invalid-secret']);
+
+        $jsonApiResponse = MailHelper::sendEmail(
+            $this->data['data']['attributes']['email'],
+            new ContactMessageEmail($this->data['data']['attributes'])
+        );
+
+        $this->assertEquals($jsonApiResponse->status(), HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        $this->assertEquals('email', $jsonApiResponse->getData()->errors[0]->source->parameter);
+        $this->assertEquals(
+            'The contact message cannot be sent because of an error sending the email.',
             $jsonApiResponse->getData()->errors[0]->title
         );
     }

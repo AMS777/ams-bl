@@ -13,7 +13,9 @@ use App\JsonApi\JsonApi1_0Document;
 
 class ResponseHelper
 {
-    public static function getJsonApiResponse(Model $model, int $httpStatus = 200): JsonResponse
+    public static function getJsonApiResponse(
+        Model $model, int $httpStatus = HttpStatusCodes::SUCCESS_OK
+    ): JsonResponse
     {
         $jsonApiDocument = null;
 
@@ -50,7 +52,9 @@ class ResponseHelper
      *   ],
      * ];
      */
-    public static function getJsonApiErrorResponse(array $errors, int $httpStatus): JsonResponse
+    public static function getJsonApiErrorResponse(
+        array $errors, int $httpStatus = HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST
+    ): JsonResponse
     {
         $jsonApiDocument = new JsonApi1_0Document;
         $jsonApiDocument->setErrorsFromKeyValueFormat($errors);

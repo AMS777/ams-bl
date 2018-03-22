@@ -13,13 +13,6 @@ use \Swift_RfcComplianceException;
 
 class MailHelper
 {
-
-    const ERROR_CODES = [
-        'INVALID_EMAIL_ADDRESS' => 'invalid_email_address',
-        'SENDMAIL_PROCESS_ERROR' => 'sendmail_process_error',
-        'ERROR_SENDING_EMAIL' => 'error_sending_email',
-    ];
-
     public static function sendEmail(
         string $emailTo, $emailContent, JsonResponse $successResponse = null
     ): JsonResponse
@@ -39,12 +32,16 @@ class MailHelper
         } catch(Swift_TransportException $e) {
             Log::error($e->getMessage() . ' [Helpers/MailHelper.php->sendEmail(): catch(Swift_TransportException)]');
 
-            return ResponseHelper::codeJsonApi_Error(self::ERROR_CODES['SENDMAIL_PROCESS_ERROR']);
+            $errors = ['email' => ['The contact message cannot be sent because of an error with the sendmail process.']];
+
+            return ResponseHelper::getJsonApiErrorResponse($errors);
 
         } catch(Exception $e) {
             Log::error($e->getMessage() . ' [Helpers/MailHelper.php->sendEmail(): catch(Exception)]');
 
-            return ResponseHelper::codeJsonApi_Error(self::ERROR_CODES['ERROR_SENDING_EMAIL']);
+            $errors = ['email' => ['The contact message cannot be sent because of an error sending the email.']];
+
+            return ResponseHelper::getJsonApiErrorResponse($errors);
         }
 
 //        if ($successResponse) {
