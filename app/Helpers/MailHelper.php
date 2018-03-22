@@ -32,7 +32,9 @@ class MailHelper
         } catch(Swift_RfcComplianceException $e) {
             Log::error($e->getMessage() . ' [Helpers/MailHelper.php->sendEmail(): catch(Swift_RfcComplianceException)]');
 
-            return ResponseHelper::codeJsonApi_Error(self::ERROR_CODES['INVALID_EMAIL_ADDRESS']);
+            $errors = ['email' => [$e->getMessage()]];
+
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
 
         } catch(Swift_TransportException $e) {
             Log::error($e->getMessage() . ' [Helpers/MailHelper.php->sendEmail(): catch(Swift_TransportException)]');
