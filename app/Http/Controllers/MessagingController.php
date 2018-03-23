@@ -21,13 +21,10 @@ class MessagingController extends Controller
             'data.attributes.message' => 'required',
         ]);
 
-        $data = [
-            'name' => $request->input('data.attributes.name'),
-            'email' => $request->input('data.attributes.email'),
-            'message' => $request->input('data.attributes.message'),
-        ];
-
-        $jsonApiResponse = MailHelper::sendEmail($data['email'], new ContactMessageEmail($data));
+        $jsonApiResponse = MailHelper::sendEmail(
+            $request->input('data.attributes.email'),
+            new ContactMessageEmail($request->input('data.attributes'))
+        );
 
         return $jsonApiResponse;
     }
