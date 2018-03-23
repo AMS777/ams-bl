@@ -29,9 +29,9 @@ class JsonApi1_0Document extends Document
             foreach ($errorMessages as $errorMessage) {
                 $errorsOnJsonApiFormat[] = [
                     'source' => [
-                        'parameter' => $errorParameter,
+                        'parameter' => str_replace('data.attributes.', '', $errorParameter),
                     ],
-                    'title' => $errorMessage,
+                    'title' => str_replace('data.attributes.', '', $errorMessage),
                 ];
             }
         }
