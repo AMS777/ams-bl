@@ -31,13 +31,4 @@ class MessagingController extends Controller
 
         return $jsonApiResponse;
     }
-
-    public function viewEmailOnBrowser()
-    {
-        return new ContactMessageEmail([
-            'name' => 'Test Name',
-            'email' => 'test@test.test',
-            'message' => 'Test message.',
-        ]);
-    }
 }
