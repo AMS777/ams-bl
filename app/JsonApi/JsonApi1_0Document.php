@@ -29,10 +29,10 @@ class JsonApi1_0Document extends Document
             foreach ($errorMessages as $errorMessage) {
                 $errorsOnJsonApiFormat[] = [
                     'source' => [
-                        'parameter' => str_replace('data.attributes.', '', $errorParameter),
+                        'parameter' => $this->arrangeParamName($errorParameter),
                     ],
-                    'title' => sprintf('%s Error', ucwords(str_replace('data.attributes.', '', $errorParameter))),
-                    'detail' => str_replace('data.attributes.', '', $errorMessage),
+                    'title' => sprintf('%s Error', ucwords($this->arrangeParamName($errorParameter))),
+                    'detail' => $this->arrangeParamName($errorMessage),
                 ];
             }
         }
@@ -40,5 +40,10 @@ class JsonApi1_0Document extends Document
         $this->errors = $errorsOnJsonApiFormat;
 
         return $this;
+    }
+
+    private function arrangeParamName(string $paramName)
+    {
+        return str_replace('data.attributes.', '', $paramName);
     }
 }
