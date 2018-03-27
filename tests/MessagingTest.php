@@ -28,7 +28,7 @@ class MessagingTest extends TestCase
 
     public function testSendContactMessage_ErrorNoData()
     {
-        $this->post('/contact-message', [])
+        $this->post('/api/contact-message', [])
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJsonStructure($this->jsonApiErrorStructure);
     }
@@ -38,7 +38,7 @@ class MessagingTest extends TestCase
         $invalidData = $this->data;
         $invalidData['data']['attributes']['email'] = '';
 
-        $this->post('/contact-message', $invalidData)
+        $this->post('/api/contact-message', $invalidData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJsonStructure($this->jsonApiErrorStructure);
     }
@@ -48,7 +48,7 @@ class MessagingTest extends TestCase
         $invalidData = $this->data;
         $invalidData['data']['attributes']['email'] = 'invalid-email';
 
-        $this->post('/contact-message', $invalidData)
+        $this->post('/api/contact-message', $invalidData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJsonStructure($this->jsonApiErrorStructure);
     }
@@ -57,7 +57,7 @@ class MessagingTest extends TestCase
     {
 //        $this->markTestSkipped('Skip: Do not write too much on log.');
 
-        $this->post('/contact-message', $this->data)
+        $this->post('/api/contact-message', $this->data)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT);
     }
 

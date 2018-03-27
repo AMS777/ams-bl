@@ -16,17 +16,17 @@ class UserController extends Controller
             . env('PASSWORD_MAX_CHARACTERS');
 
         $this->validate_ExceptionResponseJsonApi($request, [
-            'email' => 'required|email|unique:users',
-            'name' => 'required',
-            'password' => 'required|between:' . $charactersRangeSizeForPassword,
+            'data.attributes.email' => 'required|email|unique:users,email',
+            'data.attributes.name' => 'required',
+            'data.attributes.password' => 'required|between:' . $charactersRangeSizeForPassword,
         ], [
             'unique' => 'The :attribute ":input" is already used.',
         ]);
 
         $user = UserModel::create([
-            'email' => $request->input('email'),
-            'name' => $request->input('name'),
-            'password' => $this->getPasswordHash($request->input('password')),
+            'email' => $request->input('data.attributes.email'),
+            'name' => $request->input('data.attributes.name'),
+            'password' => $this->getPasswordHash($request->input('data.attributes.password')),
         ]);
 
         return ResponseHelper::getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
