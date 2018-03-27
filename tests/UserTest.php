@@ -20,15 +20,7 @@ class UserTest extends TestCase
             'email' => 'test@test.test',
         ],
     ]];
-    private $jsonApiStructure = [
-        'jsonapi',
-        'data' => ['type', 'id', 'attributes'],
-    ];
     private $jsonApiTypeUser = ['type' => 'user'];
-    private $jsonApiErrorStructure = [
-        'jsonapi',
-        'errors' => [['source' => ['parameter'], 'title']],
-    ];
 
     /* REGISTER USER **********************************************************/
 

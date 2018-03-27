@@ -14,10 +14,6 @@ class MessagingTest extends TestCase
             'message' => 'Test message.',
         ],
     ]];
-    private $jsonApiErrorStructure = [
-        'jsonapi',
-        'errors' => [['source' => ['parameter'], 'title']],
-    ];
 
     public function setUp()
     {
