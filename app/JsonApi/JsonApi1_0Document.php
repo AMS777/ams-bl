@@ -31,7 +31,8 @@ class JsonApi1_0Document extends Document
                     'source' => [
                         'parameter' => str_replace('data.attributes.', '', $errorParameter),
                     ],
-                    'title' => str_replace('data.attributes.', '', $errorMessage),
+                    'title' => sprintf('%s Error', ucwords(str_replace('data.attributes.', '', $errorParameter))),
+                    'detail' => str_replace('data.attributes.', '', $errorMessage),
                 ];
             }
         }
