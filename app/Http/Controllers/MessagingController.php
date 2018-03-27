@@ -9,10 +9,6 @@ use Illuminate\Http\JsonResponse;
 
 class MessagingController extends Controller
 {
-    const ERROR_CODES = [
-        'EMPTY_DATA' => 'empty_data',
-    ];
-
     public function contactMessage(Request $request): JsonResponse
     {
         $this->validate_ExceptionResponseJsonApi($request, [
