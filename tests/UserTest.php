@@ -32,7 +32,8 @@ class UserTest extends TestCase
         $this->post('/api/users', $invalidUserData)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['parameter' => 'email']);
+            ->seeJson(['parameter' => 'email'])
+            ->seeJson(['title' => 'Email Error']);
     }
 
     public function testRegisterUser_ErrorEmptyEmail()
@@ -41,7 +42,7 @@ class UserTest extends TestCase
         $invalidUserData['data']['attributes']['email'] = '';
 
         $this->post('/api/users', $invalidUserData)
-            ->seeJson(['title' => 'The email field is required.'])
+            ->seeJson(['detail' => 'The email field is required.'])
             ->notSeeInDatabase('users', $invalidUserData['data']['attributes']);
     }
 
@@ -51,7 +52,7 @@ class UserTest extends TestCase
         $invalidUserData['data']['attributes']['email'] = 'invalid.email';
 
         $this->post('/api/users', $invalidUserData)
-            ->seeJson(['title' => 'The email must be a valid email address.'])
+            ->seeJson(['detail' => 'The email must be a valid email address.'])
             ->notSeeInDatabase('users', $invalidUserData['data']['attributes']);
     }
 
@@ -66,7 +67,8 @@ class UserTest extends TestCase
             . ' and ' . env('PASSWORD_MAX_CHARACTERS') . ' characters.';
 
         $this->post('/api/users', $invalidUserData)
-            ->seeJson(['title' => $errorMessage])
+            ->seeJson(['title' => 'Password Error'])
+            ->seeJson(['detail' => $errorMessage])
             ->notSeeInDatabase('users', $invalidUserData['data']['attributes']);
     }
 
@@ -84,7 +86,8 @@ class UserTest extends TestCase
             . ' and ' . env('PASSWORD_MAX_CHARACTERS') . ' characters.';
 
         $this->post('/api/users', $invalidUserData)
-            ->seeJson(['title' => $errorMessage])
+            ->seeJson(['title' => 'Password Error'])
+            ->seeJson(['detail' => $errorMessage])
             ->notSeeInDatabase('users', $invalidUserData['data']['attributes']);
     }
 
@@ -109,7 +112,7 @@ class UserTest extends TestCase
 
         $this->post('/api/users', $this->userDataWithPassword)
             ->seeJson([
-                'title' => 'The email "' . $this->userDataWithoutPassword['data']['attributes']['email'] . '" is already used.'
+                'detail' => 'The email "' . $this->userDataWithoutPassword['data']['attributes']['email'] . '" is already used.'
             ])
             ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
@@ -132,13 +135,14 @@ class UserTest extends TestCase
         $this->get('/api/users?email=invalid.email')
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['parameter' => 'email']);
+            ->seeJson(['parameter' => 'email'])
+            ->seeJson(['title' => 'Email Error']);
     }
 
     public function testGetUser_ErrorInvalidEmail()
     {
         $this->get('/api/users?email=invalid.email')
-            ->seeJson(['title' => 'The email must be a valid email address.']);
+            ->seeJson(['detail' => 'The email must be a valid email address.']);
     }
 
     public function testGetUser_ErrorEmailDoesNotExist()
@@ -146,13 +150,13 @@ class UserTest extends TestCase
         $notExistingEmail = 'not.existing.email@test.test';
 
         $this->get('/api/users?email=' . $notExistingEmail)
-            ->seeJson(['title' => 'The email "' . $notExistingEmail . '" does not exist.']);
+            ->seeJson(['detail' => 'The email "' . $notExistingEmail . '" does not exist.']);
     }
 
     public function testGetUser_ErrorEmptyEmail()
     {
         $this->get('/api/users?email=')
-            ->seeJson(['title' => 'The email field is required.']);
+            ->seeJson(['detail' => 'The email field is required.']);
     }
 
     /**
@@ -166,7 +170,8 @@ class UserTest extends TestCase
         $this->get('/api/users' . $urlQuery)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
             ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['title' => 'There is no account with those email and password.']);
+            ->seeJson(['title' => 'Email, Password Error'])
+            ->seeJson(['detail' => 'There is no account with those email and password.']);
     }
 
     /**
@@ -182,6 +187,21 @@ class UserTest extends TestCase
             ->seeJsonStructure($this->jsonApiStructure)
             ->seeJson($this->jsonApiTypeUser)
             ->seeJson($this->userDataWithoutPassword['data']['attributes']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     */
+    public function testGetUserToken_Success()
+    {
+        $oauth2TokenRequest = [
+            'grant_type' => 'password',
+            'username' => $this->userDataWithPassword['data']['attributes']['email'],
+            'password' => $this->userDataWithPassword['data']['attributes']['password'],
+        ];
+        $this->post('/api/get-token', $oauth2TokenRequest)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeJsonStructure(['access_token']);
     }
 
     /* DELETE USER ************************************************************/

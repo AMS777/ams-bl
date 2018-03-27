@@ -14,7 +14,7 @@ class UserModel extends Model
 
     // attributes that are mass assignable to use with ::create()
     protected $fillable = [
-        'email', 'name', 'password',
+        'email', 'name', 'password', 'remember_token',
     ];
 
     // attributes not returned when accesed the table
