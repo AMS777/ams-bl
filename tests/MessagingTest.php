@@ -66,9 +66,10 @@ class MessagingTest extends TestCase
 
         $this->assertEquals($jsonApiResponse->status(), HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
         $this->assertEquals('email', $jsonApiResponse->getData()->errors[0]->source->parameter);
+        $this->assertEquals('Email Error', $jsonApiResponse->getData()->errors[0]->title);
         $this->assertEquals(
             'Address in mailbox given [' . $invalidData['email'] . '] does not comply with RFC 2822, 3.6.2.',
-            $jsonApiResponse->getData()->errors[0]->title
+            $jsonApiResponse->getData()->errors[0]->detail
         );
     }
 
