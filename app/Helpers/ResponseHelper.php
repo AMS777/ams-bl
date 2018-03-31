@@ -71,10 +71,15 @@ class ResponseHelper
     {
         // OAuth 2.0 access token response used by ember-simple-auth:
         // https://tools.ietf.org/html/rfc6749#section-4.3.3
-        $oauth2TokenResponse = [
+        $oauth2TokenData = [
             'access_token' => $accessToken,
         ];
 
-        return response()->json($oauth2TokenResponse, HttpStatusCodes::SUCCESS_OK);
+        return response()->json($oauth2TokenData, HttpStatusCodes::SUCCESS_OK);
+    }
+
+    public static function oauth2TokenResponse_Error(array $oauth2TokenError): JsonResponse
+    {
+        return response()->json($oauth2TokenError, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
     }
 }

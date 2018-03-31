@@ -7,9 +7,20 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
 use App\Helpers\ResponseHelper;
+use Tymon\JWTAuth\JWTAuth;
 
 class UserController extends Controller
 {
+    /**
+     * @var \Tymon\JWTAuth\JWTAuth
+     */
+    protected $jwt;
+
+    public function __construct(JWTAuth $jwt)
+    {
+        $this->jwt = $jwt;
+    }
+
     public function createUser(Request $request): JsonResponse
     {
         $charactersRangeSizeForPassword = env('PASSWORD_MIN_CHARACTERS') . ','
@@ -48,33 +59,28 @@ class UserController extends Controller
             'exists' => 'The :attribute ":input" does not exist.',
         ]);
 
-        $user = UserModel::where('email', $request->input('email'))->first();
+        if ( ! $token = $this->jwt->attempt($request->only('email', 'password'))) {
+            // errors follow the OAuth 2.0 specification:
+            // https://tools.ietf.org/html/rfc6749#section-5.1
+            $oauth2TokenError = [
+                'error' => 'invalid_client',
+                'error_title' => 'Authentication Error',
+                'error_description' => 'There is no account with those email and password.',
+            ];
 
-        if ( ! $this->verifyPassword($request->input('password'), $user['password'])) {
-
-            $errors = ['email, password' => ['There is no account with those email and password.']];
-
-            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
+            return ResponseHelper::oauth2TokenResponse_Error($oauth2TokenError);
         }
 
-//        return ResponseHelper::getJsonApiResponse($user);
-        return ResponseHelper::oauth2TokenResponse_Success($user['remember_token']);
+        return ResponseHelper::oauth2TokenResponse_Success($token);
     }
 
     public function getUser(Request $request): JsonResponse
     {
-        $this->validate_ExceptionResponseJsonApi($request, [
-            'email' => 'required|email|exists:users',
-            'password' => 'required',
-        ], [
-            'exists' => 'The :attribute ":input" does not exist.',
-        ]);
+        $user = $this->jwt->user();
 
-        $user = UserModel::where('email', $request->input('email'))->first();
+        if ( ! $user) {
 
-        if ( ! $this->verifyPassword($request->input('password'), $user['password'])) {
-
-            $errors = ['email, password' => ['There is no account with those email and password.']];
+            $errors = ['account' => ['User account cannot be read. Try to login again.']];
 
             return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
         }

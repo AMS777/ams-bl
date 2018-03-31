@@ -1,11 +1,12 @@
 <?php
 
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('users', 'UserController@getUser');
+    $router->get('users', ['middleware' => 'auth', 'uses' => 'UserController@getUser']);
     $router->post('users', 'UserController@createUser');
-    $router->delete('users', 'UserController@deleteUser');
+    $router->delete('users', ['middleware' => 'auth', 'uses' => 'UserController@deleteUser']);
     $router->post('get-token', 'UserController@getToken');
     $router->post('contact-message', 'MessagingController@contactMessage');
+
 });
 
 //$router->group(['prefix' => 'view-email-on-browser'], function () use ($router) {

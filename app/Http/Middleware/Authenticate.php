@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use App\Helpers\HttpStatusCodes;
+use App\Helpers\ResponseHelper;
 
 class Authenticate
 {
@@ -36,7 +38,16 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
         if ($this->auth->guard($guard)->guest()) {
-            return response('Unauthorized.', 401);
+            // the commented response statement below is the original response
+            // of Lumen. It shows the general misunderstanding and mixed used
+            // of "authentication" and "authorization", this class and service
+            // is about authentication but the response is about authorization.
+            // The official status code is "401 Unauthorized", yet it refers to
+            // authentication.
+//            return response('Unauthorized.', 401);
+            $errors = ['authentication' => ['The user is not authenticated.']];
+
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
         }
 
         return $next($request);

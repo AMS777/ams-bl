@@ -31,6 +31,7 @@ following the JSON API specification.
 - PHP7. This project uses PHP7 features. The
 [Lumen version](https://lumen.laravel.com/docs/5.6#installation)
 of this project requires PHP7.
+- Authentication with JWT: https://tools.ietf.org/html/rfc7519
 
 
 ## Packages
@@ -43,6 +44,8 @@ This project uses following packages:
   https://github.com/tobscure/json-api
 - illuminate/mail, guzzlehttp/guzzle. Emailing functionality.  
   See section [Emailing Functionality](#emailing-functionality).
+- tymondesigns/jwt-auth. JSON Web Token (JWT) Authentication for Laravel & Lumen.  
+  https://github.com/tymondesigns/jwt-auth
 
 
 ## Install
@@ -62,6 +65,12 @@ the command (from Flipbox Lumen Generator package):
 
 ```
 $ php artisan key:generate
+```
+
+Set the application secret to hash the signature of the JSON Web Tokens (JWT):
+
+```
+$ php artisan jwt:secret
 ```
 
 To serve the project locally, on command line in the project directory (command

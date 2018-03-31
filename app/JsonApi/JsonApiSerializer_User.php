@@ -23,6 +23,9 @@ class JsonApiSerializer_User extends AbstractSerializer
         if (isset($user->name)) {
             $attributes['name'] = $user->name;
         }
+        if (isset($user->remember_token)) {
+            $attributes['remember_token'] = $user->remember_token;
+        }
 
         return $attributes;
     }

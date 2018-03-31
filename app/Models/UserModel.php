@@ -3,9 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class UserModel extends Model
+class UserModel extends Model implements JWTSubject, AuthenticatableContract
 {
+    use Authenticatable;
+
     protected $table = 'users';
 
     protected $primaryKey = 'id';
@@ -17,8 +22,18 @@ class UserModel extends Model
         'email', 'name', 'password', 'remember_token',
     ];
 
-    // attributes not returned when accesed the table
+    // attributes not returned when the table is accessed
     protected $hidden = [
         'password',
     ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

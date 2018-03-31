@@ -9,7 +9,7 @@ class UserTest extends TestCase
         'type' => 'user',
         'attributes' => [
             'name' => 'Test Name',
-            'email' => 'test@test.test',
+            'email' => 'valid@email.format',
             'password' => 'Test_Password.#áÉíÖüñÑ',
         ],
     ]];
@@ -17,10 +17,16 @@ class UserTest extends TestCase
         'type' => 'user',
         'attributes' => [
             'name' => 'Test Name',
-            'email' => 'test@test.test',
+            'email' => 'valid@email.format',
         ],
     ]];
     private $jsonApiTypeUser = ['type' => 'user'];
+    private $oauth2TokenRequest = [
+        'grant_type' => 'password',
+        'username' => 'valid@email.format',
+        'password' => 'Test_Password.#áÉíÖüñÑ',
+    ];
+    private $oauth2ErrorStructure = ['error', 'error_title', 'error_description'];
 
     /* REGISTER USER **********************************************************/
 
@@ -117,6 +123,86 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
 
+    /* USER TOKEN *************************************************************/
+
+    public function testGetUserToken_ErrorEmailGeneral()
+    {
+        $invalidOauth2TokenRequest = $this->oauth2TokenRequest;
+        $invalidOauth2TokenRequest['username'] = 'invalid.email';
+
+        $this->post('/api/get-token', $invalidOauth2TokenRequest)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'email'])
+            ->seeJson(['title' => 'Email Error']);
+    }
+
+    public function testGetUser_ErrorInvalidEmail()
+    {
+        $invalidOauth2TokenRequest = $this->oauth2TokenRequest;
+        $invalidOauth2TokenRequest['username'] = 'invalid.email';
+
+        $this->post('/api/get-token', $invalidOauth2TokenRequest)
+            ->seeJson(['detail' => 'The email must be a valid email address.']);
+    }
+
+    public function testGetUser_ErrorEmailDoesNotExist()
+    {
+        $invalidOauth2TokenRequest = $this->oauth2TokenRequest;
+        $invalidOauth2TokenRequest['username'] = 'not.existing.email@test.test';
+
+        $this->post('/api/get-token', $invalidOauth2TokenRequest)
+            ->seeJson(['detail' => 'The email "' . $invalidOauth2TokenRequest['username'] . '" does not exist.']);
+    }
+
+    public function testGetUserToken_ErrorEmptyEmail()
+    {
+        $invalidOauth2TokenRequest = $this->oauth2TokenRequest;
+        $invalidOauth2TokenRequest['username'] = '';
+
+        $this->post('/api/get-token', $invalidOauth2TokenRequest)
+            ->seeJson(['detail' => 'The email field is required.']);
+    }
+
+    public function testGetUserToken_ErrorWrongPassword()
+    {
+        $invalidOauth2TokenRequest = $this->oauth2TokenRequest;
+        $invalidOauth2TokenRequest['password'] = 'Wrong.Password';
+
+        $this->post('/api/get-token', $invalidOauth2TokenRequest)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeJsonStructure($this->oauth2ErrorStructure)
+            ->seeJson(['error' => 'invalid_client'])
+            ->seeJson(['error_title' => 'Authentication Error'])
+            ->seeJson(['error_description' => 'There is no account with those email and password.']);
+    }
+
+    public function testGetUserToken_Success()
+    {
+        $this->post('/api/get-token', $this->oauth2TokenRequest)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
+            ->seeJsonStructure(['access_token']);
+
+        $accessToken = $this->response->getOriginalContent()['access_token'];
+
+        $this->assertContains(
+            '"sub":',
+            base64_decode($accessToken),
+            'JWT contains reference to user id ("sub", subject): ' . base64_decode($accessToken),
+            true
+        );
+        $this->assertNotContains(
+            $this->userDataWithPassword['data']['attributes']['password'],
+            base64_decode($accessToken),
+            'JWT does not contain user password: ' . base64_decode($accessToken),
+            true
+        );
+
+        $authHeader = ['Authorization' => 'Bearer ' . $accessToken];
+
+        return $authHeader;
+    }
+
     /* GET USER ***************************************************************/
 
     /**
@@ -130,87 +216,60 @@ class UserTest extends TestCase
         $this->assertArrayNotHasKey('password', $user->toArray());
     }
 
-    public function testGetUser_ErrorEmailGeneral()
-    {
-        $this->get('/api/users?email=invalid.email')
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['parameter' => 'email'])
-            ->seeJson(['title' => 'Email Error']);
-    }
-
-    public function testGetUser_ErrorInvalidEmail()
-    {
-        $this->get('/api/users?email=invalid.email')
-            ->seeJson(['detail' => 'The email must be a valid email address.']);
-    }
-
-    public function testGetUser_ErrorEmailDoesNotExist()
-    {
-        $notExistingEmail = 'not.existing.email@test.test';
-
-        $this->get('/api/users?email=' . $notExistingEmail)
-            ->seeJson(['detail' => 'The email "' . $notExistingEmail . '" does not exist.']);
-    }
-
-    public function testGetUser_ErrorEmptyEmail()
-    {
-        $this->get('/api/users?email=')
-            ->seeJson(['detail' => 'The email field is required.']);
-    }
-
-    /**
-     * @depends testRegisterUser_Success
-     */
-    public function testGetUser_ErrorWrongPassword()
-    {
-        $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
-            . '&password=WRONG_PASSWORD';
-
-        $this->get('/api/users' . $urlQuery)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['title' => 'Email, Password Error'])
-            ->seeJson(['detail' => 'There is no account with those email and password.']);
-    }
-
-    /**
-     * @depends testRegisterUser_Success
-     */
-    public function testGetUser_Success()
+    public function testGetUser_ErrorNoToken()
     {
         $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
             . '&password=' . urlencode($this->userDataWithPassword['data']['attributes']['password']);
 
         $this->get('/api/users' . $urlQuery)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'authentication'])
+            ->seeJson(['title' => 'Authentication Error'])
+            ->seeJson(['detail' => 'The user is not authenticated.']);
+    }
+
+    public function testGetUser_ErrorWrongToken()
+    {
+        $wrongAuthHeader = ['Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2FwaVwvZ2V0LXRva2VuIiwiaWF0IjoxNTIyNDk3NTIzLCJleHAiOjE1MjI1MDExMjMsIm5iZiI6MTUyMjQ5NzUyMywianRpIjoidmdTNGZXU3hUR2FFem5LQyIsInN1YiI6MzI5LCJwcnYiOiI0MWRmODgzNGYxYjk4ZjcwZWZhNjBhYWVkZWY0MjM0MTM3MDA2OTBjIn0.1FeDFn03i4mmT7cRIU8jy8fylOtBbmfPdATgNq5piG0'];
+
+        $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
+            . '&password=' . urlencode($this->userDataWithPassword['data']['attributes']['password']);
+
+        $this->get('/api/users' . $urlQuery, $wrongAuthHeader)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'authentication'])
+            ->seeJson(['title' => 'Authentication Error'])
+            ->seeJson(['detail' => 'The user is not authenticated.']);
+    }
+
+    /**
+     * @depends testGetUserToken_Success
+     */
+    public function testGetUser_Success($authHeader)
+    {
+        $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
+            . '&password=' . urlencode($this->userDataWithPassword['data']['attributes']['password']);
+
+        $this->get('/api/users' . $urlQuery, $authHeader)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->seeJsonStructure($this->jsonApiStructure)
             ->seeJson($this->jsonApiTypeUser)
             ->seeJson($this->userDataWithoutPassword['data']['attributes']);
     }
 
-    /**
-     * @depends testRegisterUser_Success
-     */
-    public function testGetUserToken_Success()
-    {
-        $oauth2TokenRequest = [
-            'grant_type' => 'password',
-            'username' => $this->userDataWithPassword['data']['attributes']['email'],
-            'password' => $this->userDataWithPassword['data']['attributes']['password'],
-        ];
-        $this->post('/api/get-token', $oauth2TokenRequest)
-            ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
-            ->seeJsonStructure(['access_token']);
-    }
-
     /* DELETE USER ************************************************************/
 
-    public function testDeleteUser_Success()
+    /**
+     * @depends testGetUserToken_Success
+     */
+    public function testDeleteUser_Success($authHeader)
     {
         $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
 
-        $this->delete('/api/users', ['email' => $this->userDataWithoutPassword['data']['attributes']['email']])
+        $params = ['email' => $this->userDataWithoutPassword['data']['attributes']['email']];
+        $this->delete('/api/users', $params, $authHeader)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
