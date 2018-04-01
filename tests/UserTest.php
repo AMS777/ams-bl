@@ -26,7 +26,9 @@ class UserTest extends TestCase
         'username' => 'valid@email.format',
         'password' => 'Test_Password.#áÉíÖüñÑ',
     ];
+    private $oauth2Structure = ['access_token', 'userId', 'userName'];
     private $oauth2ErrorStructure = ['error', 'error_title', 'error_description'];
+    private $oldJwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2FwaVwvZ2V0LXRva2VuIiwiaWF0IjoxNTIyNDk3NTIzLCJleHAiOjE1MjI1MDExMjMsIm5iZiI6MTUyMjQ5NzUyMywianRpIjoidmdTNGZXU3hUR2FFem5LQyIsInN1YiI6MzI5LCJwcnYiOiI0MWRmODgzNGYxYjk4ZjcwZWZhNjBhYWVkZWY0MjM0MTM3MDA2OTBjIn0.1FeDFn03i4mmT7cRIU8jy8fylOtBbmfPdATgNq5piG0';
 
     /* REGISTER USER **********************************************************/
 
@@ -107,6 +109,10 @@ class UserTest extends TestCase
             ->seeJson($this->jsonApiTypeUser)
             ->notSeeInDatabase('users', $this->userDataWithPassword['data']['attributes'])
             ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
+
+        $userId = $this->response->getOriginalContent()->jsonSerialize()['data']['id'];
+
+        return $userId;
     }
 
     /**
@@ -181,7 +187,7 @@ class UserTest extends TestCase
     {
         $this->post('/api/get-token', $this->oauth2TokenRequest)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
-            ->seeJsonStructure(['access_token']);
+            ->seeJsonStructure($this->oauth2Structure);
 
         $accessToken = $this->response->getOriginalContent()['access_token'];
 
@@ -208,35 +214,20 @@ class UserTest extends TestCase
     /**
      * @depends testRegisterUser_Success
      */
-    public function testPasswordNotReturnedFromDbOnUserModel()
+    public function testPasswordNotReturnedFromDbOnUserModel($userId)
     {
-        $user = UserModel::where('email', $this->userDataWithPassword['data']['attributes']['email'])->first();
+        $user = UserModel::where('id', $userId)->first();
 
         $this->assertNotContains('password', $user->toArray());
         $this->assertArrayNotHasKey('password', $user->toArray());
     }
 
-    public function testGetUser_ErrorNoToken()
+    /**
+     * @depends testRegisterUser_Success
+     */
+    public function testGetUser_ErrorNoToken($userId)
     {
-        $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
-            . '&password=' . urlencode($this->userDataWithPassword['data']['attributes']['password']);
-
-        $this->get('/api/users' . $urlQuery)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
-            ->seeJsonStructure($this->jsonApiErrorStructure)
-            ->seeJson(['parameter' => 'authentication'])
-            ->seeJson(['title' => 'Authentication Error'])
-            ->seeJson(['detail' => 'The user is not authenticated.']);
-    }
-
-    public function testGetUser_ErrorWrongToken()
-    {
-        $wrongAuthHeader = ['Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2FwaVwvZ2V0LXRva2VuIiwiaWF0IjoxNTIyNDk3NTIzLCJleHAiOjE1MjI1MDExMjMsIm5iZiI6MTUyMjQ5NzUyMywianRpIjoidmdTNGZXU3hUR2FFem5LQyIsInN1YiI6MzI5LCJwcnYiOiI0MWRmODgzNGYxYjk4ZjcwZWZhNjBhYWVkZWY0MjM0MTM3MDA2OTBjIn0.1FeDFn03i4mmT7cRIU8jy8fylOtBbmfPdATgNq5piG0'];
-
-        $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
-            . '&password=' . urlencode($this->userDataWithPassword['data']['attributes']['password']);
-
-        $this->get('/api/users' . $urlQuery, $wrongAuthHeader)
+        $this->get('/api/users/' . $userId)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
             ->seeJsonStructure($this->jsonApiErrorStructure)
             ->seeJson(['parameter' => 'authentication'])
@@ -245,14 +236,27 @@ class UserTest extends TestCase
     }
 
     /**
+     * @depends testRegisterUser_Success
+     */
+    public function testGetUser_ErrorWrongToken($userId)
+    {
+        $wrongAuthHeader = ['Authorization' => 'Bearer ' . $this->oldJwtToken];
+
+        $this->get('/api/users/' . $userId, $wrongAuthHeader)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'authentication'])
+            ->seeJson(['title' => 'Authentication Error'])
+            ->seeJson(['detail' => 'The user is not authenticated.']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
      * @depends testGetUserToken_Success
      */
-    public function testGetUser_Success($authHeader)
+    public function testGetUser_Success($userId, $authHeader)
     {
-        $urlQuery = '?email=' . urlencode($this->userDataWithPassword['data']['attributes']['email'])
-            . '&password=' . urlencode($this->userDataWithPassword['data']['attributes']['password']);
-
-        $this->get('/api/users' . $urlQuery, $authHeader)
+        $this->get('/api/users/' . $userId, $authHeader)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_OK)
             ->seeJsonStructure($this->jsonApiStructure)
             ->seeJson($this->jsonApiTypeUser)

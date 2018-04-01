@@ -59,7 +59,9 @@ class UserController extends Controller
             'exists' => 'The :attribute ":input" does not exist.',
         ]);
 
-        if ( ! $token = $this->jwt->attempt($request->only('email', 'password'))) {
+        if (( ! $token = $this->jwt->attempt($request->only('email', 'password')))
+            || ( ! $this->jwt->user())
+        ) {
             // errors follow the OAuth 2.0 specification:
             // https://tools.ietf.org/html/rfc6749#section-5.1
             $oauth2TokenError = [
@@ -71,14 +73,14 @@ class UserController extends Controller
             return ResponseHelper::oauth2TokenResponse_Error($oauth2TokenError);
         }
 
-        return ResponseHelper::oauth2TokenResponse_Success($token);
+        return ResponseHelper::oauth2TokenResponse_Success($this->jwt->user(), $token);
     }
 
-    public function getUser(Request $request): JsonResponse
+    public function getUser($userId): JsonResponse
     {
         $user = $this->jwt->user();
 
-        if ( ! $user) {
+        if (( ! $user) || ($user->id != $userId)) {
 
             $errors = ['account' => ['User account cannot be read. Try to login again.']];
 

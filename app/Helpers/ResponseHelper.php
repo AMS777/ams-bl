@@ -67,12 +67,14 @@ class ResponseHelper
         return response()->json(null, HttpStatusCodes::SUCCESS_NO_CONTENT);
     }
 
-    public static function oauth2TokenResponse_Success(string $accessToken): JsonResponse
+    public static function oauth2TokenResponse_Success(UserModel $user, string $accessToken): JsonResponse
     {
         // OAuth 2.0 access token response used by ember-simple-auth:
         // https://tools.ietf.org/html/rfc6749#section-4.3.3
         $oauth2TokenData = [
             'access_token' => $accessToken,
+            'userId' => $user->id,
+            'userName' => $user->name,
         ];
 
         return response()->json($oauth2TokenData, HttpStatusCodes::SUCCESS_OK);
