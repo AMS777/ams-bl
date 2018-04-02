@@ -44,6 +44,6 @@ class JsonApi1_0Document extends Document
 
     private function arrangeParamName(string $paramName)
     {
-        return str_replace('data.attributes.', '', $paramName);
+        return str_replace('data.', '', str_replace('attributes.', '', $paramName));
     }
 }
