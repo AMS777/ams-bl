@@ -20,6 +20,16 @@ class UserTest extends TestCase
             'email' => 'valid@email.format',
         ],
     ]];
+    private $updatedUserDataEmpty = [ 'data' => [
+        'type' => 'user',
+        'id' => '',
+        'attributes' => [],
+    ]];
+    private $updatedUserData = [
+        'name' => 'Updated Test Name',
+        'email' => 'updated.valid@email.format',
+        'password' => 'Updated-Test_Password.#áÉíÖüñÑ',
+    ];
     private $jsonApiTypeUser = ['type' => 'user'];
     private $oauth2TokenRequest = [
         'grant_type' => 'password',
@@ -263,17 +273,128 @@ class UserTest extends TestCase
             ->seeJson($this->userDataWithoutPassword['data']['attributes']);
     }
 
+    /* UPDATE USER ************************************************************/
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testUpdateUser_Name_Success($userId, $authHeader)
+    {
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['id'] = $userId;
+        $jsonApi['data']['attributes']['name'] = $this->updatedUserData['name'];
+
+        $this->notSeeInDatabase('users', $jsonApi['data']['attributes'])
+            ->patch('/api/users/' . $userId, $jsonApi, $authHeader)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
+            ->seeInDatabase('users', $jsonApi['data']['attributes']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testUpdateUser_Email_ErrorInvalid($userId, $authHeader)
+    {
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['id'] = $userId;
+        $jsonApi['data']['attributes']['email'] = 'invalid.email';
+
+        $this->notSeeInDatabase('users', $jsonApi['data']['attributes'])
+            ->patch('/api/users/' . $userId, $jsonApi, $authHeader)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'email'])
+            ->seeJson(['title' => 'Email Error'])
+            ->notSeeInDatabase('users', $jsonApi['data']['attributes']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testUpdateUser_Email_ErrorWrongUser(int $userId, $authHeader)
+    {
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['id'] = $userId;
+        $jsonApi['data']['attributes']['email'] = 'invalid.email';
+
+        $this->notSeeInDatabase('users', $jsonApi['data']['attributes'])
+            ->patch('/api/users/' . ($userId + 1), $jsonApi, $authHeader)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->notSeeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testUpdateUser_Email_Success($userId, $authHeader)
+    {
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['id'] = $userId;
+        $jsonApi['data']['attributes']['email'] = $this->updatedUserData['email'];
+
+        $this->notSeeInDatabase('users', $jsonApi['data']['attributes'])
+            ->patch('/api/users/' . $userId, $jsonApi, $authHeader)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
+            ->seeInDatabase('users', $jsonApi['data']['attributes']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testUpdateUser_Password_Success($userId, $authHeader)
+    {
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['id'] = $userId;
+        $jsonApi['data']['attributes']['password'] = $this->updatedUserData['password'];
+
+        $this->patch('/api/users/' . $userId, $jsonApi, $authHeader)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testUpdateUser_Success($userId, $authHeader)
+    {
+        $jsonApi = $this->userDataWithPassword;
+        $jsonApi['data']['id'] = $userId;
+
+        $this->notSeeInDatabase('users', $this->userDataWithoutPassword['data']['attributes'])
+            ->patch('/api/users/' . $userId, $jsonApi, $authHeader)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
+            ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
+    }
+
     /* DELETE USER ************************************************************/
 
     /**
+     * @depends testRegisterUser_Success
      * @depends testGetUserToken_Success
      */
-    public function testDeleteUser_Success($authHeader)
+    public function testDeleteUser_ErrorWrongUser(int $userId, $authHeader)
     {
         $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
 
-        $params = ['email' => $this->userDataWithoutPassword['data']['attributes']['email']];
-        $this->delete('/api/users', $params, $authHeader)
+        $this->delete('/api/users/' . ($userId + 1), [], $authHeader)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
+    public function testDeleteUser_Success($userId, $authHeader)
+    {
+        $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
+
+        $this->delete('/api/users/' . $userId, [], $authHeader)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }

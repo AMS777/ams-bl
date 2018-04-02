@@ -76,23 +76,62 @@ class UserController extends Controller
         return ResponseHelper::oauth2TokenResponse_Success($this->jwt->user(), $token);
     }
 
-    public function getUser($userId): JsonResponse
+    public function getUser(int $userId): JsonResponse
     {
         $user = $this->jwt->user();
-
         if (( ! $user) || ($user->id != $userId)) {
-
-            $errors = ['account' => ['User account cannot be read. Try to login again.']];
-
-            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
+            $errors = ['authorization' => ['User account cannot be read. Try to login again.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
         }
 
         return ResponseHelper::getJsonApiResponse($user);
     }
 
-    public function deleteUser(Request $request): JsonResponse
+    public function updateUser(Request $request, int $userId): JsonResponse
     {
-        UserModel::where('email', $request->input('email'))->delete();
+        $user = $this->jwt->user();
+        if (( ! $user) || ($user->id != $userId)) {
+            $errors = ['authorization' => ['User account cannot be read. Try to login again.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
+        }
+
+        $charactersRangeSizeForPassword = env('PASSWORD_MIN_CHARACTERS') . ','
+            . env('PASSWORD_MAX_CHARACTERS');
+
+        $this->validate_ExceptionResponseJsonApi($request, [
+            'data.id' => 'required|exists:users,id',
+            'data.attributes.email' => 'email|unique:users,email',
+            'data.attributes.password' => 'between:' . $charactersRangeSizeForPassword,
+        ], [
+            'unique' => 'The :attribute ":input" is already used.',
+        ]);
+
+        $user = UserModel::find($userId);
+
+        if ($request->filled('data.attributes.name')) {
+            $user->name = $request->input('data.attributes.name');
+        }
+        if ($request->filled('data.attributes.email')) {
+            $user->email = $request->input('data.attributes.email');
+        }
+        if ($request->filled('data.attributes.password')) {
+            $user->password = $this->getPasswordHash($request->input('data.attributes.password'));
+        }
+
+        $user->save();
+
+        return ResponseHelper::getNoContentJsonResponse();
+    }
+
+    public function deleteUser(int $userId): JsonResponse
+    {
+        $user = $this->jwt->user();
+        if (( ! $user) || ($user->id != $userId)) {
+            $errors = ['authorization' => ['User account cannot be deleted.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
+        }
+
+        UserModel::destroy($userId);
 
         return ResponseHelper::getNoContentJsonResponse();
     }

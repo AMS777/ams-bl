@@ -3,10 +3,10 @@
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('users/{userId}', ['middleware' => 'auth', 'uses' => 'UserController@getUser']);
     $router->post('users', 'UserController@createUser');
-    $router->delete('users', ['middleware' => 'auth', 'uses' => 'UserController@deleteUser']);
+    $router->patch('users/{userId}', ['middleware' => 'auth', 'uses' => 'UserController@updateUser']);
+    $router->delete('users/{userId}', ['middleware' => 'auth', 'uses' => 'UserController@deleteUser']);
     $router->post('get-token', 'UserController@getToken');
     $router->post('contact-message', 'MessagingController@contactMessage');
-
 });
 
 //$router->group(['prefix' => 'view-email-on-browser'], function () use ($router) {
