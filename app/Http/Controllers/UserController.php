@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
 use App\Helpers\ResponseHelper;
 use Tymon\JWTAuth\JWTAuth;
+use Gate;
 
 class UserController extends Controller
 {
@@ -76,12 +77,13 @@ class UserController extends Controller
         return ResponseHelper::oauth2TokenResponse_Success($this->jwt->user(), $token);
     }
 
-    public function getUser(int $userId): JsonResponse
+    public function getUser(Request $request, int $userId): JsonResponse
     {
-        $user = $this->jwt->user();
-        if (( ! $user) || ($user->id != $userId)) {
+        $user = UserModel::find($userId);
+
+        if (( ! $user) || Gate::denies('get-user', $user)) {
             $errors = ['authorization' => ['User account cannot be read. Try to login again.']];
-            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_FORBIDDEN);
         }
 
         return ResponseHelper::getJsonApiResponse($user);
@@ -89,10 +91,11 @@ class UserController extends Controller
 
     public function updateUser(Request $request, int $userId): JsonResponse
     {
-        $user = $this->jwt->user();
-        if (( ! $user) || ($user->id != $userId)) {
+        $user = UserModel::find($userId);
+
+        if (( ! $user) || Gate::denies('update-user', $user)) {
             $errors = ['authorization' => ['User account cannot be read. Try to login again.']];
-            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_FORBIDDEN);
         }
 
         $charactersRangeSizeForPassword = env('PASSWORD_MIN_CHARACTERS') . ','
@@ -105,8 +108,6 @@ class UserController extends Controller
         ], [
             'unique' => 'The :attribute ":input" is already used.',
         ]);
-
-        $user = UserModel::find($userId);
 
         if ($request->filled('data.attributes.name')) {
             $user->name = $request->input('data.attributes.name');
@@ -125,10 +126,11 @@ class UserController extends Controller
 
     public function deleteUser(int $userId): JsonResponse
     {
-        $user = $this->jwt->user();
-        if (( ! $user) || ($user->id != $userId)) {
+        $user = UserModel::find($userId);
+
+        if (( ! $user) || Gate::denies('delete-user', $user)) {
             $errors = ['authorization' => ['User account cannot be deleted.']];
-            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED);
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_FORBIDDEN);
         }
 
         UserModel::destroy($userId);

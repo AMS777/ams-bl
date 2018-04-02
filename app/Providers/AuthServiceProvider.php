@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\UserModel;
 use Illuminate\Support\ServiceProvider;
-
+use Gate;
+use Log;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -34,5 +36,15 @@ class AuthServiceProvider extends ServiceProvider
 //                return UserModel::where('api_token', $request->input('api_token'))->first();
 //            }
 //        });
+
+        Gate::define('get-user', function(UserModel $authUser, UserModel $targetUser) {
+            return $authUser->id == $targetUser->id;
+        });
+        Gate::define('update-user', function(UserModel $authUser, UserModel $targetUser) {
+            return $authUser->id == $targetUser->id;
+        });
+        Gate::define('delete-user', function(UserModel $authUser, UserModel $targetUser) {
+            return $authUser->id == $targetUser->id;
+        });
     }
 }

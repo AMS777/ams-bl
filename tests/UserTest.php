@@ -264,6 +264,17 @@ class UserTest extends TestCase
      * @depends testRegisterUser_Success
      * @depends testGetUserToken_Success
      */
+    public function testGetUser_ErrorWrongUser(int $userId, $authHeader)
+    {
+        $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes'])
+            ->get('/api/users/' . ($userId + 1), $authHeader)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_FORBIDDEN);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     * @depends testGetUserToken_Success
+     */
     public function testGetUser_Success($userId, $authHeader)
     {
         $this->get('/api/users/' . $userId, $authHeader)
@@ -322,7 +333,7 @@ class UserTest extends TestCase
 
         $this->notSeeInDatabase('users', $jsonApi['data']['attributes'])
             ->patch('/api/users/' . ($userId + 1), $jsonApi, $authHeader)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_FORBIDDEN)
             ->notSeeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
 
@@ -382,7 +393,7 @@ class UserTest extends TestCase
         $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
 
         $this->delete('/api/users/' . ($userId + 1), [], $authHeader)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNAUTHORIZED)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_FORBIDDEN)
             ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
 
