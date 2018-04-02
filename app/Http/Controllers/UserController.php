@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Helpers\HttpStatusCodes;
 use App\Helpers\ResponseHelper;
 use Tymon\JWTAuth\JWTAuth;
+use Illuminate\Support\Facades\Hash;
 use Gate;
 
 class UserController extends Controller
@@ -38,7 +39,7 @@ class UserController extends Controller
         $user = UserModel::create([
             'email' => $request->input('data.attributes.email'),
             'name' => $request->input('data.attributes.name'),
-            'password' => $this->getPasswordHash($request->input('data.attributes.password')),
+            'password' => Hash::make($request->input('data.attributes.password')),
             'remember_token' => str_random(100),
         ]);
 
@@ -116,7 +117,7 @@ class UserController extends Controller
             $user->email = $request->input('data.attributes.email');
         }
         if ($request->filled('data.attributes.password')) {
-            $user->password = $this->getPasswordHash($request->input('data.attributes.password'));
+            $user->password = Hash::make($request->input('data.attributes.password'));
         }
 
         $user->save();
@@ -136,15 +137,5 @@ class UserController extends Controller
         UserModel::destroy($userId);
 
         return ResponseHelper::getNoContentJsonResponse();
-    }
-
-    private function getPasswordHash(string $password): string
-    {
-        return password_hash($password, PASSWORD_DEFAULT);
-    }
-
-    private function verifyPassword(string $password, string $hash): bool
-    {
-        return password_verify($password, $hash);
     }
 }

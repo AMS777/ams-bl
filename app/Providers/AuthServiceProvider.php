@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Models\UserModel;
 use Illuminate\Support\ServiceProvider;
 use Gate;
-use Log;
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
