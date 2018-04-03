@@ -104,8 +104,8 @@ class UserController extends Controller
 
         $this->validate_ExceptionResponseJsonApi($request, [
             'data.id' => 'required|exists:users,id',
-            'data.attributes.email' => 'email|unique:users,email',
-            'data.attributes.password' => 'between:' . $charactersRangeSizeForPassword,
+            'data.attributes.email' => 'nullable|email|unique:users,email,' . $userId,
+            'data.attributes.password' => 'nullable|between:' . $charactersRangeSizeForPassword,
         ], [
             'unique' => 'The :attribute ":input" is already used.',
         ]);
