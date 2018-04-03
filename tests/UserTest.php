@@ -382,6 +382,47 @@ class UserTest extends TestCase
             ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
 
+    /* REQUEST RESET PASSWORD *************************************************/
+
+    public function testRequestResetPassword_ErrorEmailGeneral()
+    {
+        $invalidJsonApi = $this->updatedUserDataEmpty;
+        $invalidJsonApi['data']['attributes']['email'] = 'invalid.email';
+
+        $this->post('/api/request-reset-password', $invalidJsonApi)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'email'])
+            ->seeJson(['title' => 'Email Error']);
+    }
+
+    public function testRequestResetPassword_ErrorInvalidEmail()
+    {
+        $invalidJsonApi = $this->updatedUserDataEmpty;
+        $invalidJsonApi['data']['attributes']['email'] = 'invalid.email';
+
+        $this->post('/api/request-reset-password', $invalidJsonApi)
+            ->seeJson(['detail' => 'The email must be a valid email address.']);
+    }
+
+    public function testRequestResetPassword_ErrorEmailDoesNotExist()
+    {
+        $invalidJsonApi = $this->updatedUserDataEmpty;
+        $invalidJsonApi['data']['attributes']['email'] = 'not.existing.email@test.test';
+
+        $this->post('/api/request-reset-password', $invalidJsonApi)
+            ->seeJson(['detail' => 'The email "' . $invalidJsonApi['data']['attributes']['email'] . '" does not exist.']);
+    }
+
+    public function testRequestResetPassword_Success()
+    {
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['attributes']['email'] = $this->userDataWithPassword['data']['attributes']['email'];
+
+        $this->post('/api/request-reset-password', $jsonApi)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT);
+    }
+
     /* DELETE USER ************************************************************/
 
     /**

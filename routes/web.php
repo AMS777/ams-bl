@@ -6,6 +6,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->patch('users/{userId}', ['middleware' => 'auth', 'uses' => 'UserController@updateUser']);
     $router->delete('users/{userId}', ['middleware' => 'auth', 'uses' => 'UserController@deleteUser']);
     $router->post('get-token', 'UserController@getToken');
+    $router->post('request-reset-password', 'UserController@requestResetPassword');
     $router->post('contact-message', 'MessagingController@contactMessage');
 });
 

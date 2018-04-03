@@ -40,8 +40,12 @@ class UserController extends Controller
             'email' => $request->input('data.attributes.email'),
             'name' => $request->input('data.attributes.name'),
             'password' => Hash::make($request->input('data.attributes.password')),
-            'remember_token' => str_random(100),
         ]);
+
+        if ( ! $user) {
+            $errors = ['create' => ['Error creating user account.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        }
 
         return ResponseHelper::getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
     }
@@ -120,7 +124,10 @@ class UserController extends Controller
             $user->password = Hash::make($request->input('data.attributes.password'));
         }
 
-        $user->save();
+        if ( ! $user->save()) {
+            $errors = ['update' => ['Error updating user account.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        }
 
         return ResponseHelper::getNoContentJsonResponse();
     }
@@ -134,7 +141,29 @@ class UserController extends Controller
             return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_FORBIDDEN);
         }
 
-        UserModel::destroy($userId);
+        if ( ! UserModel::destroy($userId)) {
+            $errors = ['delete' => ['Error deleting user account.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        }
+
+        return ResponseHelper::getNoContentJsonResponse();
+    }
+
+    public function requestResetPassword(Request $request): JsonResponse
+    {
+        $this->validate_ExceptionResponseJsonApi($request, [
+            'data.attributes.email' => 'required|email|exists:users,email',
+        ], [
+            'exists' => 'The :attribute ":input" does not exist.',
+        ]);
+
+        $user = UserModel::where('email', $request->input('data.attributes.email'))->first();
+        $user->reset_password_token = str_random(100);
+
+        if ( ! $user->save()) {
+            $errors = ['update' => ['Error updating user account.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        }
 
         return ResponseHelper::getNoContentJsonResponse();
     }
