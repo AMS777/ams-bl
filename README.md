@@ -31,6 +31,7 @@ following the JSON API specification.
 - PHP7. This project uses PHP7 features. The
 [Lumen version](https://lumen.laravel.com/docs/5.6#installation)
 of this project requires PHP7.
+- Contact message email.
 - Authentication with JWT: https://tools.ietf.org/html/rfc7519
 - Authorization to get, update and delete user.
 
