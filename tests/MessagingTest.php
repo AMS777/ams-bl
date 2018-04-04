@@ -10,7 +10,7 @@ class MessagingTest extends TestCase
         'type' => 'contactMessage',
         'attributes' => [
             'name' => 'Test Name',
-            'email' => 'test@test.test',
+            'email' => 'valid@email.format',
             'message' => 'Test message.',
         ],
     ]];
@@ -22,40 +22,7 @@ class MessagingTest extends TestCase
         config(['mail.driver' => 'log']);
     }
 
-    public function testSendContactMessage_ErrorNoData()
-    {
-        $this->post('/api/contact-message', [])
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($this->jsonApiErrorStructure);
-    }
-
-    public function testSendContactMessage_ErrorEmptyEmail()
-    {
-        $invalidData = $this->data;
-        $invalidData['data']['attributes']['email'] = '';
-
-        $this->post('/api/contact-message', $invalidData)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($this->jsonApiErrorStructure);
-    }
-
-    public function testSendContactMessage_ErrorInvalidEmail()
-    {
-        $invalidData = $this->data;
-        $invalidData['data']['attributes']['email'] = 'invalid-email';
-
-        $this->post('/api/contact-message', $invalidData)
-            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
-            ->seeJsonStructure($this->jsonApiErrorStructure);
-    }
-
-    public function testSendContactMessage_Success()
-    {
-//        $this->markTestSkipped('Skip: Do not write too much on log.');
-
-        $this->post('/api/contact-message', $this->data)
-            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT);
-    }
+    /* EMAIL HELPER ***********************************************************/
 
     public function testMailHelper_ErrorInvalidEmail()
     {
@@ -111,5 +78,42 @@ class MessagingTest extends TestCase
             'The contact message cannot be sent because of an error sending the email.',
             $jsonApiResponse->getData()->errors[0]->title
         );
+    }
+
+    /* CONTACT MESSAGE ********************************************************/
+
+    public function testSendContactMessage_ErrorNoData()
+    {
+        $this->post('/api/contact-message', [])
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure);
+    }
+
+    public function testSendContactMessage_ErrorEmptyEmail()
+    {
+        $invalidData = $this->data;
+        $invalidData['data']['attributes']['email'] = '';
+
+        $this->post('/api/contact-message', $invalidData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure);
+    }
+
+    public function testSendContactMessage_ErrorInvalidEmail()
+    {
+        $invalidData = $this->data;
+        $invalidData['data']['attributes']['email'] = 'invalid-email';
+
+        $this->post('/api/contact-message', $invalidData)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure);
+    }
+
+    public function testSendContactMessage_Success()
+    {
+//        $this->markTestSkipped('Skip: Do not write too much on log.');
+
+        $this->post('/api/contact-message', $this->data)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT);
     }
 }

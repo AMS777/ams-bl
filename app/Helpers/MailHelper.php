@@ -14,13 +14,13 @@ use \Swift_RfcComplianceException;
 class MailHelper
 {
     public static function sendEmail(
-        string $emailTo, $emailContent, JsonResponse $successResponse = null
+        string $emailTo, $builtEmail, JsonResponse $successResponse = null
     ): JsonResponse
     {
         try {
             // Laravel provides a clean, simple API over the popular SwiftMailer library:
             // https://swiftmailer.symfony.com/docs/sending.html
-            Mail::to($emailTo)->bcc(env('MAIL_FROM_ADDRESS'))->send($emailContent);
+            Mail::to($emailTo)->bcc(env('MAIL_FROM_ADDRESS'))->send($builtEmail);
 
         } catch(Swift_RfcComplianceException $e) {
             Log::error('[Helpers/MailHelper.php->sendEmail(): catch(Swift_RfcComplianceException)] ' . $e->getMessage());
