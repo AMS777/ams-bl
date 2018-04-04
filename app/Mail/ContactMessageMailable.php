@@ -4,7 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Mail\Mailable;
 
-class ContactMessageEmail extends Mailable
+class ContactMessageMailable extends Mailable
 {
     public $data;
 

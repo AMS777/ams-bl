@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Mailable;
 use App\Helpers\ResponseHelper;
 use \Log;
 
@@ -14,7 +15,7 @@ use \Swift_RfcComplianceException;
 class MailHelper
 {
     public static function sendEmail(
-        string $emailTo, $builtEmail, JsonResponse $successResponse = null
+        string $emailTo, Mailable $builtEmail, JsonResponse $successResponse = null
     ): JsonResponse
     {
         try {
