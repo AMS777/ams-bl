@@ -171,4 +171,32 @@ class UserController extends Controller
 
         return $jsonApiResponse;
     }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $charactersRangeSizeForPassword = env('PASSWORD_MIN_CHARACTERS') . ','
+            . env('PASSWORD_MAX_CHARACTERS');
+
+        $this->validate_ExceptionResponseJsonApi($request, [
+            'data.attributes.reset_password_token' => 'required|exists:users,reset_password_token',
+            'data.attributes.password' => 'required|between:' . $charactersRangeSizeForPassword,
+        ], [
+            'data.attributes.reset_password_token.exists' => 'The reset password token is invalid.',
+        ]);
+
+        $user = UserModel::where(
+            'reset_password_token',
+            $request->input('data.attributes.reset_password_token')
+        )->first();
+
+        $user->password = Hash::make($request->input('data.attributes.password'));
+        $user->reset_password_token = null;
+
+        if ( ! $user->save()) {
+            $errors = ['update' => ['Error updating user account.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        }
+
+        return ResponseHelper::getNoContentJsonResponse();
+    }
 }

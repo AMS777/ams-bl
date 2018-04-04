@@ -39,6 +39,7 @@ class UserTest extends TestCase
     private $oauth2Structure = ['access_token', 'userId', 'userName'];
     private $oauth2ErrorStructure = ['error', 'error_title', 'error_description'];
     private $oldJwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2FwaVwvZ2V0LXRva2VuIiwiaWF0IjoxNTIyNDk3NTIzLCJleHAiOjE1MjI1MDExMjMsIm5iZiI6MTUyMjQ5NzUyMywianRpIjoidmdTNGZXU3hUR2FFem5LQyIsInN1YiI6MzI5LCJwcnYiOiI0MWRmODgzNGYxYjk4ZjcwZWZhNjBhYWVkZWY0MjM0MTM3MDA2OTBjIn0.1FeDFn03i4mmT7cRIU8jy8fylOtBbmfPdATgNq5piG0';
+    private $oldResetPasswordToken = 'hY5zg8567VQyXg3FNd5AgjXomiT2Di0PQ8kfLDZ91Vvsg35EVDg8RfaL9hub7DPGv2DrfvcIG9fYimbSWmSwMIMGfVFP9xRcqo8b';
 
     public function setUp()
     {
@@ -425,9 +426,12 @@ class UserTest extends TestCase
             ->seeJson(['detail' => 'The email "' . $invalidJsonApi['data']['attributes']['email'] . '" does not exist.']);
     }
 
-    public function testRequestResetPassword_Success()
+    /**
+     * @depends testRegisterUser_Success
+     */
+    public function testRequestResetPassword_Success($userId)
     {
-//        $this->markTestSkipped('Skip: Do not write too much on log.');
+//        $this->markTestSkipped('Skip: Avoid writting email on log.');
 
         $userWithResetPasswordToken = $this->userDataWithoutPassword['data']['attributes'];
         $userWithResetPasswordToken['reset_password_token'] = null;
@@ -436,6 +440,68 @@ class UserTest extends TestCase
 
         $this->seeInDatabase('users', $userWithResetPasswordToken)
             ->post('/api/request-reset-password', $jsonApi)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
+            ->notSeeInDatabase('users', $userWithResetPasswordToken);
+
+        $user = UserModel::where('id', $userId)->first();
+
+        return $user->reset_password_token;
+    }
+
+    /* RESET PASSWORD *********************************************************/
+
+    /**
+     * @depends testRequestResetPassword_Success
+     */
+    public function testResetPassword_ErrorWrongToken()
+    {
+        $userWithResetPasswordToken = $this->userDataWithoutPassword['data']['attributes'];
+        $userWithResetPasswordToken['reset_password_token'] = $this->oldResetPasswordToken;
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['attributes']['reset_password_token'] = $this->oldResetPasswordToken;
+        $jsonApi['data']['attributes']['password'] = $this->updatedUserData['password'];
+
+        $this->notSeeInDatabase('users', $userWithResetPasswordToken)
+            ->post('/api/reset-password', $jsonApi)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'reset_password_token'])
+            ->seeJson(['title' => 'Reset Password Token Error'])
+            ->seeJson(['detail' => 'The reset password token is invalid.']);
+    }
+
+    /**
+     * @depends testRequestResetPassword_Success
+     */
+    public function testResetPassword_ErrorPasswordEmpty(string $resetPasswordToken)
+    {
+        $userWithResetPasswordToken = $this->userDataWithoutPassword['data']['attributes'];
+        $userWithResetPasswordToken['reset_password_token'] = $resetPasswordToken;
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['attributes']['reset_password_token'] = $resetPasswordToken;
+
+        $this->seeInDatabase('users', $userWithResetPasswordToken)
+            ->post('/api/reset-password', $jsonApi)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'password'])
+            ->seeJson(['title' => 'Password Error'])
+            ->seeJson(['detail' => 'The password field is required.']);
+    }
+
+    /**
+     * @depends testRequestResetPassword_Success
+     */
+    public function testResetPassword_Success(string $resetPasswordToken)
+    {
+        $userWithResetPasswordToken = $this->userDataWithoutPassword['data']['attributes'];
+        $userWithResetPasswordToken['reset_password_token'] = $resetPasswordToken;
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['attributes']['reset_password_token'] = $resetPasswordToken;
+        $jsonApi['data']['attributes']['password'] = $this->updatedUserData['password'];
+
+        $this->seeInDatabase('users', $userWithResetPasswordToken)
+            ->post('/api/reset-password', $jsonApi)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $userWithResetPasswordToken);
     }
