@@ -4,7 +4,8 @@ namespace App\Mail;
 
 use Illuminate\Mail\Mailable;
 
-class ContactMessageMailable extends Mailable
+// the class name is the default email subject
+class ContactMessage extends Mailable
 {
     public $data;
 
@@ -25,6 +26,6 @@ class ContactMessageMailable extends Mailable
      */
     public function build()
     {
-        return $this->markdown('mail.ContactMessageEmail');
+        return $this->markdown('mail.ContactMessage');
     }
 }

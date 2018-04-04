@@ -5,7 +5,8 @@ namespace App\Mail;
 use App\Models\UserModel;
 use Illuminate\Mail\Mailable;
 
-class RequestResetPasswordMailable extends Mailable
+// the class name is the default email subject
+class RequestResetPassword extends Mailable
 {
     public $user;
 

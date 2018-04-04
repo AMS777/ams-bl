@@ -2,7 +2,7 @@
 
 use App\Helpers\HttpStatusCodes;
 use App\Helpers\MailHelper;
-use App\Mail\ContactMessageMailable;
+use App\Mail\ContactMessage;
 
 class MessagingTest extends TestCase
 {
@@ -29,7 +29,7 @@ class MessagingTest extends TestCase
         $invalidData = $this->data['data']['attributes'];
         $invalidData['email'] = 'invalid-email';
 
-        $jsonApiResponse = MailHelper::sendEmail($invalidData['email'], new ContactMessageMailable($invalidData));
+        $jsonApiResponse = MailHelper::sendEmail($invalidData['email'], new ContactMessage($invalidData));
 
         $this->assertEquals($jsonApiResponse->status(), HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY);
         $this->assertEquals('email', $jsonApiResponse->getData()->errors[0]->source->parameter);

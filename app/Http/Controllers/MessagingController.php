@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\MailHelper;
-use App\Mail\ContactMessageMailable;
+use App\Mail\ContactMessage;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -19,7 +19,7 @@ class MessagingController extends Controller
 
         $jsonApiResponse = MailHelper::sendEmail(
             $request->input('data.attributes.email'),
-            new ContactMessageMailable($request->input('data.attributes'))
+            new ContactMessage($request->input('data.attributes'))
         );
 
         return $jsonApiResponse;

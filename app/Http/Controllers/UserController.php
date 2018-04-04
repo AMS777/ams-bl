@@ -11,7 +11,7 @@ use Tymon\JWTAuth\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use Gate;
 use App\Helpers\MailHelper;
-use App\Mail\RequestResetPasswordMailable;
+use App\Mail\RequestResetPassword;
 
 class UserController extends Controller
 {
@@ -167,7 +167,7 @@ class UserController extends Controller
             return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
         }
 
-        $jsonApiResponse = MailHelper::sendEmail($user->email, new RequestResetPasswordMailable($user));
+        $jsonApiResponse = MailHelper::sendEmail($user->email, new RequestResetPassword($user));
 
         return $jsonApiResponse;
     }
