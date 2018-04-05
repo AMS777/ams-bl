@@ -1,6 +1,6 @@
 @component('mail::message')
 
-# Reset password
+# Reset Password
 
 Hello {{ $user->name }},
 

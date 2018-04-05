@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class RenameRememberTokenToResetPasswor extends Migration
+class AddVerifyEmailTokenToUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class RenameRememberTokenToResetPasswor extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('remember_token', 'reset_password_token');
+            $table->string('verify_email_token', 100)->nullable()->unique();
         });
     }
 
@@ -26,7 +26,7 @@ class RenameRememberTokenToResetPasswor extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('reset_password_token', 'remember_token');
+            $table->dropColumn('verify_email_token');
         });
     }
 }

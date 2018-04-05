@@ -45,10 +45,10 @@ class MailHelper
             return ResponseHelper::getJsonApiErrorResponse($errors);
         }
 
-//        if ($successResponse) {
-//
-//            return $successResponse;
-//        }
+        if ($successResponse) {
+
+            return $successResponse;
+        }
 
         return ResponseHelper::getNoContentJsonResponse();
     }

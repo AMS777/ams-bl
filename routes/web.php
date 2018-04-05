@@ -9,6 +9,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->post('request-reset-password', 'UserController@requestResetPassword');
     $router->post('reset-password', 'UserController@resetPassword');
     $router->post('contact-message', 'MessagingController@contactMessage');
+    $router->post('verify-email', 'UserController@verifyEmail');
 });
 
 //$router->group(['prefix' => 'view-email-on-browser'], function () use ($router) {

@@ -40,6 +40,7 @@ class UserTest extends TestCase
     private $oauth2ErrorStructure = ['error', 'error_title', 'error_description'];
     private $oldJwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2FwaVwvZ2V0LXRva2VuIiwiaWF0IjoxNTIyNDk3NTIzLCJleHAiOjE1MjI1MDExMjMsIm5iZiI6MTUyMjQ5NzUyMywianRpIjoidmdTNGZXU3hUR2FFem5LQyIsInN1YiI6MzI5LCJwcnYiOiI0MWRmODgzNGYxYjk4ZjcwZWZhNjBhYWVkZWY0MjM0MTM3MDA2OTBjIn0.1FeDFn03i4mmT7cRIU8jy8fylOtBbmfPdATgNq5piG0';
     private $oldResetPasswordToken = 'hY5zg8567VQyXg3FNd5AgjXomiT2Di0PQ8kfLDZ91Vvsg35EVDg8RfaL9hub7DPGv2DrfvcIG9fYimbSWmSwMIMGfVFP9xRcqo8b';
+    private $oldVerifyEmailToken = 'hY5zg8567VQyXg3FNd5AgjXomiT2Di0PQ8kfLDZ91Vvsg35EVDg8RfaL9hub7DPGv2DrfvcIG9fYimbSWmSwMIMGfVFP9xRcqo8b';
 
     public function setUp()
     {
@@ -431,7 +432,7 @@ class UserTest extends TestCase
      */
     public function testRequestResetPassword_Success($userId)
     {
-//        $this->markTestSkipped('Skip: Avoid writting email on log.');
+        $this->markTestSkipped('Skip: Avoid writting email on log to keep it short.');
 
         $userWithResetPasswordToken = $this->userDataWithoutPassword['data']['attributes'];
         $userWithResetPasswordToken['reset_password_token'] = null;
@@ -504,6 +505,44 @@ class UserTest extends TestCase
             ->post('/api/reset-password', $jsonApi)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $userWithResetPasswordToken);
+    }
+
+    /* VERIFY EMAIL ***********************************************************/
+
+    /**
+     * @depends testRegisterUser_Success
+     */
+    public function testVerifyEmail_ErrorWrongToken()
+    {
+        $userWithVerifyEmailToken = $this->userDataWithoutPassword['data']['attributes'];
+        $userWithVerifyEmailToken['verify_email_token'] = $this->oldVerifyEmailToken;
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['attributes']['verify_email_token'] = $this->oldVerifyEmailToken;
+
+        $this->notSeeInDatabase('users', $userWithVerifyEmailToken)
+            ->post('/api/verify-email', $jsonApi)
+            ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_UNPROCESSABLE_ENTITY)
+            ->seeJsonStructure($this->jsonApiErrorStructure)
+            ->seeJson(['parameter' => 'verify_email_token'])
+            ->seeJson(['title' => 'Verify Email Token Error'])
+            ->seeJson(['detail' => 'The verify email token is invalid.']);
+    }
+
+    /**
+     * @depends testRegisterUser_Success
+     */
+    public function testVerifyEmail_Success($userId)
+    {
+        $verifyEmailToken = UserModel::where('id', $userId)->first()->verify_email_token;
+        $userWithVerifyEmailToken = $this->userDataWithoutPassword['data']['attributes'];
+        $userWithVerifyEmailToken['verify_email_token'] = $verifyEmailToken;
+        $jsonApi = $this->updatedUserDataEmpty;
+        $jsonApi['data']['attributes']['verify_email_token'] = $verifyEmailToken;
+
+        $this->seeInDatabase('users', $userWithVerifyEmailToken)
+            ->post('/api/verify-email', $jsonApi)
+            ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
+            ->notSeeInDatabase('users', $userWithVerifyEmailToken);
     }
 
     /* DELETE USER ************************************************************/

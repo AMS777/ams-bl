@@ -11,6 +11,7 @@ use Tymon\JWTAuth\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use Gate;
 use App\Helpers\MailHelper;
+use App\Mail\RegisterConfirmation;
 use App\Mail\RequestResetPassword;
 
 class UserController extends Controller
@@ -42,6 +43,7 @@ class UserController extends Controller
             'email' => $request->input('data.attributes.email'),
             'name' => $request->input('data.attributes.name'),
             'password' => Hash::make($request->input('data.attributes.password')),
+            'verify_email_token' => str_random(100),
         ]);
 
         if ( ! $user) {
@@ -49,7 +51,13 @@ class UserController extends Controller
             return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
         }
 
-        return ResponseHelper::getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED);
+        $jsonApiResponse = MailHelper::sendEmail(
+            $user->email,
+            new RegisterConfirmation($user),
+            ResponseHelper::getJsonApiResponse($user, HttpStatusCodes::SUCCESS_CREATED)
+        );
+
+        return $jsonApiResponse;
     }
 
     public function getToken(Request $request): JsonResponse
@@ -191,6 +199,29 @@ class UserController extends Controller
 
         $user->password = Hash::make($request->input('data.attributes.password'));
         $user->reset_password_token = null;
+
+        if ( ! $user->save()) {
+            $errors = ['update' => ['Error updating user account.']];
+            return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
+        }
+
+        return ResponseHelper::getNoContentJsonResponse();
+    }
+
+    public function verifyEmail(Request $request): JsonResponse
+    {
+        $this->validate_ExceptionResponseJsonApi($request, [
+            'data.attributes.verify_email_token' => 'required|exists:users,verify_email_token',
+        ], [
+            'data.attributes.verify_email_token.exists' => 'The verify email token is invalid.',
+        ]);
+
+        $user = UserModel::where(
+            'verify_email_token',
+            $request->input('data.attributes.verify_email_token')
+        )->first();
+
+        $user->verify_email_token = null;
 
         if ( ! $user->save()) {
             $errors = ['update' => ['Error updating user account.']];

@@ -62,9 +62,11 @@ class ResponseHelper
         return response()->json($jsonApiDocument, $httpStatus);
     }
 
-    public static function getNoContentJsonResponse(): JsonResponse
+    public static function getNoContentJsonResponse(
+        int $httpStatus = HttpStatusCodes::SUCCESS_NO_CONTENT
+    ): JsonResponse
     {
-        return response()->json(null, HttpStatusCodes::SUCCESS_NO_CONTENT);
+        return response()->json(null, $httpStatus);
     }
 
     public static function oauth2TokenResponse_Success(UserModel $user, string $accessToken): JsonResponse

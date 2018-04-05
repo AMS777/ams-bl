@@ -19,7 +19,7 @@ class UserModel extends Model implements JWTSubject, AuthenticatableContract
 
     // attributes that are mass assignable to use with ::create()
     protected $fillable = [
-        'email', 'name', 'password', 'remember_token',
+        'email', 'name', 'password', 'remember_token', 'verify_email_token',
     ];
 
     // attributes not returned when the table is accessed
