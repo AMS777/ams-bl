@@ -29,7 +29,7 @@ class RegisterConfirmation extends Mailable
     {
         return $this->markdown(
             'mail.RegisterConfirmation',
-            ['verifyEmailUrl' => env('APP_DOMAIN') . '/verify-email/' . $this->user->email_verified]
+            ['verifyEmailUrl' => env('APP_DOMAIN') . '/verify-email/' . $this->user->verify_email_token]
         );
     }
 }
