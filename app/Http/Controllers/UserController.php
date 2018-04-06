@@ -13,6 +13,7 @@ use Gate;
 use App\Helpers\MailHelper;
 use App\Mail\RegisterConfirmation;
 use App\Mail\RequestResetPassword;
+use App\Mail\DeleteAccountConfirmation;
 
 class UserController extends Controller
 {
@@ -151,12 +152,14 @@ class UserController extends Controller
             return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_FORBIDDEN);
         }
 
-        if ( ! UserModel::destroy($userId)) {
+        if ( ! $user->delete()) {
             $errors = ['delete' => ['Error deleting user account.']];
             return ResponseHelper::getJsonApiErrorResponse($errors, HttpStatusCodes::CLIENT_ERROR_BAD_REQUEST);
         }
 
-        return ResponseHelper::getNoContentJsonResponse();
+        $jsonApiResponse = MailHelper::sendEmail($user->email, new DeleteAccountConfirmation($user));
+
+        return $jsonApiResponse;
     }
 
     public function requestResetPassword(Request $request): JsonResponse
