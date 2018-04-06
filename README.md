@@ -28,7 +28,7 @@ developed with the Javascript framework [Ember.js](https://www.emberjs.com/)**
 
 - TDD. This project uses [Test Driven Development](https://www.agilealliance.org/glossary/tdd/)
 as development methodology with unit tests.
-- JSON API. API request and responses follow JSON API v1.0 specification:
+- JSON API. API requests and responses follow the JSON API v1.0 specification:
 http://jsonapi.org/format/
 - JWT. Authentication with JSON Web Tokens: https://tools.ietf.org/html/rfc7519
 - PHP7. This project uses PHP7 features. The
