@@ -235,7 +235,7 @@ class UserTest extends TestCase
      */
     public function testPasswordNotReturnedFromDbOnUserModel($userId)
     {
-        $user = UserModel::where('id', $userId)->first();
+        $user = UserModel::find($userId);
 
         $this->assertNotContains('password', $user->toArray());
         $this->assertArrayNotHasKey('password', $user->toArray());
@@ -444,7 +444,7 @@ class UserTest extends TestCase
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $userWithResetPasswordToken);
 
-        $user = UserModel::where('id', $userId)->first();
+        $user = UserModel::find($userId);
 
         return $user->reset_password_token;
     }
@@ -533,7 +533,7 @@ class UserTest extends TestCase
      */
     public function testVerifyEmail_Success($userId)
     {
-        $verifyEmailToken = UserModel::where('id', $userId)->first()->verify_email_token;
+        $verifyEmailToken = UserModel::find($userId)->verify_email_token;
         $userWithVerifyEmailToken = $this->userDataWithoutPassword['data']['attributes'];
         $userWithVerifyEmailToken['verify_email_token'] = $verifyEmailToken;
         $jsonApi = $this->updatedUserDataEmpty;
@@ -551,11 +551,10 @@ class UserTest extends TestCase
      * @depends testRegisterUser_Success
      * @depends testGetUserToken_Success
      */
-    public function testDeleteUser_ErrorWrongUser(int $userId, $authHeader)
+    public function testDeleteUser_ErrorWrongUser(int $userId, array $authHeader)
     {
-        $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
-
-        $this->delete('/api/users/' . ($userId + 1), [], $authHeader)
+        $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes'])
+            ->delete('/api/users/' . ($userId + 1), [], $authHeader)
             ->seeStatusCode(HttpStatusCodes::CLIENT_ERROR_FORBIDDEN)
             ->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
@@ -564,11 +563,10 @@ class UserTest extends TestCase
      * @depends testRegisterUser_Success
      * @depends testGetUserToken_Success
      */
-    public function testDeleteUser_Success($userId, $authHeader)
+    public function testDeleteUser_Success(int $userId, array $authHeader)
     {
-        $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
-
-        $this->delete('/api/users/' . $userId, [], $authHeader)
+        $this->seeInDatabase('users', $this->userDataWithoutPassword['data']['attributes'])
+            ->delete('/api/users/' . $userId, [], $authHeader)
             ->seeStatusCode(HttpStatusCodes::SUCCESS_NO_CONTENT)
             ->notSeeInDatabase('users', $this->userDataWithoutPassword['data']['attributes']);
     }
