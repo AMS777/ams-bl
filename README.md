@@ -44,7 +44,7 @@ This project uses following packages:
 - Flipbox Lumen Generator: Command line resources generator extension.  
   https://github.com/flipboxstudio/lumen-generator
 - Tobscure JSON-API: Build objects following the JSON API specification.  
-  https://github.com/tobscure/json-api
+  https://github.com/tobscure/json-api  
   I haven't found a package that fulfills the complete specification
   of JSON API, but the Tobscure JSON-API package is pretty clean and easy to use.
   It lacks some implementations, like JSON API error specification, but I've
