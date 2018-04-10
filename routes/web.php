@@ -16,7 +16,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 //
 //    $router->get('/contact-message', function () {
 //
-//        return new App\Mail\ContactMessageEmail([
+//        return new App\Mail\ContactMessage([
 //            'name' => 'Test Name',
 //            'email' => 'test@test.test',
 //            'message' => 'Test message.',
