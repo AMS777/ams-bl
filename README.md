@@ -17,9 +17,9 @@ may be set up with the [ams-bel architecture](https://github.com/AMS777/ams-bel)
 ## Demo
 
 **You can see a working demo of the ams-be frontend project and the ams-bl 
-backend project with the ams-bel architecture at:
+backend project with the ams-bel architecture at:**
 
-http://ams-bel.mas.gallery/**
+**http://ams-bel.mas.gallery/**
 
 
 ## Features
