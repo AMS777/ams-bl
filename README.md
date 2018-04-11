@@ -106,6 +106,9 @@ Set the application secret to hash the signature of the JSON Web Tokens (JWT):
 $ php artisan jwt:secret
 ```
 
+
+## Run Development Server
+
 To serve the project locally, on command line in the project directory (command
 from Flipbox Lumen Generator package):
 
