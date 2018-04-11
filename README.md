@@ -1,3 +1,4 @@
+
 # ams-bl
 
 This project is a quick-start boilerplate of the PHP micro-framework 
@@ -8,8 +9,17 @@ and email notifications.
 It's recomended for API projects that implement the JSON API specification (http://jsonapi.org/).
 
 **ams-bl is a backend project that matches the [frontend project ams-be](https://github.com/AMS777/ams-be) 
-developed with the Javascript framework [Ember.js](https://www.emberjs.com/)** 
-(though other frontend may be used).
+developed with the Javascript framework [Ember.js](https://www.emberjs.com/) and
+may be set up with the [ams-bel architecture](https://github.com/AMS777/ams-bel)** 
+(though other frontend and architecture may be used).
+
+
+## Demo
+
+**You can see a working demo of the ams-be frontend project and the ams-bl 
+backend project with the ams-bel architecture at:
+
+http://ams-bel.mas.gallery/**
 
 
 ## Features
@@ -31,10 +41,11 @@ as development methodology with unit tests.
 - JSON API. API requests and responses follow the JSON API v1.0 specification:
 http://jsonapi.org/format/
 - JWT. Authentication with JSON Web Tokens: https://tools.ietf.org/html/rfc7519
-- PHP7. This project uses PHP7 features. The
-[Lumen version](https://lumen.laravel.com/docs/5.6#installation)
-of this project requires PHP7.
-- Database migrations for MySQL.
+- PHP7.1. This project uses 
+[PHP7.1 features](http://php.net/manual/en/migration71.new-features.php).
+- MySQL. [Database migrations](https://lumen.laravel.com/docs/5.6/database#migrations) for MySQL.
+- Lumen 5.6. This project is developed with the
+  <a href="https://lumen.laravel.com/docs/5.6/releases#5.6.0" target="_blank">5.6 version of Lumen</a>.
 
 
 ## Packages
@@ -58,9 +69,23 @@ This project uses following packages:
 
 ## Install
 
-Lumen version installed: 5.6.
-
 Download or fork this project and take it as the starting point of your own project.
+
+Set file and directory permissions:
+
+```
+$ sudo chown -R <user-name>:<group-name> ams-bl/
+$ find ams-bl/ -type d -exec chmod 755 {} \;
+$ find ams-bl/ -type f -exec chmod 644 {} \;
+
+```
+Files and directories within "storage/" directory need to be writable for the web server user. 
+
+```
+$ sudo chgrp -R www-data ams-bl/storage/
+$ find ams-bl/storage/ -type d -exec chmod 775 {} \;
+$ find ams-bl/storage/ -type f -exec chmod 664 {} \;
+```
 
 On command line inside the project directory:
 
@@ -95,11 +120,15 @@ After creating your own project from this one, add your own files to the
 existing ones.
 
 You can modify the existing files on the project you've created. The key
-files are:
+files are located in:
 
-- `tests/UserTest.php`
-- `app/Http/Controllers/UserController.php`
-- `app/Models/UserModel.php`
+- `tests/`
+- `app/Helpers/`
+- `app/Http/Controllers/`
+- `app/JsonApi/`
+- `app/Mail/`
+- `app/Models/`
+- `resources/views/mail/`
 
 
 ## Tests
@@ -122,24 +151,32 @@ $ vendor/phpunit/phpunit/phpunit
 Lumen does not have emailing functionality. It's one of the features lost when 
 stripping down Laravel to obtain a micro framework.
 
-To add emailing functionality I've followed the steps described on:
+The steps followed to add emailing functionality are described on:
 
 https://stackoverflow.com/questions/47124070/easiest-way-to-send-emails-with-lumen-5-4-and-mailgun/47124071#47124071
 
-Email sending and exception handling is done on `app/Helpers/MailHelper.php`.
+Email sending and exception handling are performed on `app/Helpers/MailHelper.php`.
 
 More info on Laravel documentation:
 
 https://laravel.com/docs/5.6/mail
 
-### Checking and testing emails
+### Checking emails
 
-Emails may be previewed on browsers enabling specific routes as you can see on [`routes/web.php`](routes/web.php).
+Emails may be previewed on browsers enabling specific routes as you can see on 
+[`routes/web.php`](routes/web.php).
+
+The email routes are available for testing purposes but on production
+environments remove them from [`routes/web.php`](routes/web.php),
+or at least comment them if you expect to be needing them often.
+
+### Testing emails
 
 To test the emailing functionality, the mail driver is set to `log` so that emails
 are not sent but written on the app log (`storage/logs/lumen.log`).
 
-Thus, use `config(['mail.driver' => 'log']);` as you can see on [`tests/MessagingTest.php`](tests/MessagingTest.php).
+Thus, use `config(['mail.driver' => 'log']);` as you can see on 
+[`tests/MessagingTest.php`](tests/MessagingTest.php).
 
 
 ## License
