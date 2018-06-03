@@ -77,8 +77,8 @@ Set file and directory permissions:
 $ sudo chown -R <user-name>:<group-name> ams-bl/
 $ find ams-bl/ -type d -exec chmod 755 {} \;
 $ find ams-bl/ -type f -exec chmod 644 {} \;
-
 ```
+
 Files and directories within "storage/" directory need to be writable for the web server user. 
 
 ```
@@ -93,8 +93,13 @@ On command line inside the project directory:
 $ composer install
 ```
 
-Create the `.env` file by copying `.env.example`, and set the application key with
-the command (from Flipbox Lumen Generator package):
+Create the `.env` file by copying `.env.example`:
+
+```
+$ cp .env.example .env
+```
+
+Set the application key with the command (from Flipbox Lumen Generator package):
 
 ```
 $ php artisan key:generate
@@ -104,6 +109,24 @@ Set the application secret to hash the signature of the JSON Web Tokens (JWT):
 
 ```
 $ php artisan jwt:secret
+```
+
+Configure `.env` file with the Mailgun data.
+
+Create MySQL database and user:
+
+```
+$ mysql -u <user> -p
+mysql> create database ams_bel;
+mysql> create user '<user_name>'@'localhost' identified by '<password>';
+mysql> grant all on ams_bel.* to '<user_name>'@'localhost';
+mysql> show grants for '<user_name>'@'localhost';
+```
+
+Configure `.env` file with the database data and run migrations:
+
+```
+$ php artisan migrate
 ```
 
 
@@ -137,15 +160,7 @@ files are located in:
 ## Tests
 
 ```
-$ phpunit
-```
-
-If error "No tests executed!" or some other is produced, global installed
-`phpunit` package may be being used and having an unmatching version for this
-project. Local installed `phpunit` must be used instead:
-
-```
-$ vendor/phpunit/phpunit/phpunit
+$ vendor/phpunit/phpunit/phpunit --verbose # --verbose shows incomplete and skipped tests (if @depends is used)
 ```
 
 
