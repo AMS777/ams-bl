@@ -14,14 +14,6 @@ may be set up with the [ams-bel architecture](https://github.com/AMS777/ams-bel)
 (though other frontend and architecture may be used).
 
 
-## Demo
-
-**You can see a working demo of the ams-be frontend project and the ams-bl 
-backend project with the ams-bel architecture at:**
-
-**http://ams-bel.mas.gallery/**
-
-
 ## Features
 
 - User create, get, update and delete.
